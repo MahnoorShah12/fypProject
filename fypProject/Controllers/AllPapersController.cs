@@ -27,8 +27,6 @@ namespace fypProject.Controllers
         {
             try
             {
-                var a = "My name mahnoor shah huzaifaaa";
-              
                 var activeSession = db.sessions.FirstOrDefault(s => s.Active == true);
                 if (activeSession == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "No active session found");
