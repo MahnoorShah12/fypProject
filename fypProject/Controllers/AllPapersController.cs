@@ -27,6 +27,7 @@ namespace fypProject.Controllers
         {
             try
             {
+                var res = "i love mano";
               
                 var activeSession = db.sessions.FirstOrDefault(s => s.Active == true);
                 if (activeSession == null)
