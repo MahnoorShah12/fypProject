@@ -27,7 +27,7 @@ namespace fypProject.Controllers
         {
             try
             {
-                var res = "i love mano";
+                var a = "My name mahnoor shah huzaifaaa";
               
                 var activeSession = db.sessions.FirstOrDefault(s => s.Active == true);
                 if (activeSession == null)
