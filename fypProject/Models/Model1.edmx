@@ -1,0 +1,2084 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="DirectorDashboardModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Alert">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="sender_id" Type="int" Nullable="false" />
+          <Property Name="reciever_id" Type="int" Nullable="false" />
+          <Property Name="paper_id" Type="int" Nullable="false" />
+          <Property Name="description" Type="varchar" MaxLength="225" />
+        </EntityType>
+        <EntityType Name="clo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="description" Type="varchar" MaxLength="225" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="session_id" Type="int" />
+        </EntityType>
+        <EntityType Name="Clo_Weightage">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="clo_id" Type="int" Nullable="false" />
+          <Property Name="term" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="weightage" Type="int" />
+        </EntityType>
+        <EntityType Name="Comment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="comment_date" Type="date" />
+          <Property Name="comment_time" Type="time" Precision="7" />
+          <Property Name="description" Type="varchar" MaxLength="225" />
+          <Property Name="mark_read" Type="bit" />
+        </EntityType>
+        <EntityType Name="Comment_Paper_Question">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="comment_id" Type="int" Nullable="false" />
+          <Property Name="paper_id" Type="int" Nullable="false" />
+          <Property Name="sender_id" Type="int" Nullable="false" />
+          <Property Name="receiver_id" Type="int" Nullable="false" />
+          <Property Name="question_id" Type="int" />
+        </EntityType>
+        <EntityType Name="course">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_code" Type="varchar" MaxLength="50" />
+          <Property Name="title" Type="varchar" MaxLength="225" />
+          <Property Name="credit_hours" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Course_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="section_id" Type="int" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="session_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Difficulty_level_policy">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="eassy_Q" Type="int" />
+          <Property Name="medium_Q" Type="int" />
+          <Property Name="difficult_Q" Type="int" />
+          <Property Name="term" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="session_id" Type="int" />
+        </EntityType>
+        <EntityType Name="paper">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="session_id" Type="int" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="paper_Date" Type="date" />
+          <Property Name="Start_time" Type="time" Precision="7" />
+          <Property Name="end_time" Type="time" Precision="7" />
+          <Property Name="duration" Type="int" />
+          <Property Name="degree_programs" Type="varchar" MaxLength="225" />
+          <Property Name="total_marks" Type="int" />
+          <Property Name="teacher_name" Type="varchar" MaxLength="225" />
+          <Property Name="term" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="no_of_questions" Type="int" />
+          <Property Name="status" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="paper_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="session_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Question">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="text" Type="varchar" MaxLength="225" />
+          <Property Name="description" Type="varchar" MaxLength="225" />
+          <Property Name="image" Type="varchar" MaxLength="225" />
+          <Property Name="difficulty_level" Type="varchar" MaxLength="50" />
+          <Property Name="clo_id" Type="int" />
+          <Property Name="marks" Type="int" />
+          <Property Name="paper_id" Type="int" Nullable="false" />
+          <Property Name="isextra" Type="bit" />
+          <Property Name="editor_id" Type="int" />
+          <Property Name="version" Type="int" />
+        </EntityType>
+        <EntityType Name="Question_Accept_Reject">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="question_id" Type="int" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="status" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Question_edited">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="text" Type="varchar" MaxLength="225" />
+          <Property Name="description" Type="varchar" MaxLength="225" />
+          <Property Name="image" Type="varchar" MaxLength="225" />
+          <Property Name="difficulty_level" Type="varchar" MaxLength="50" />
+          <Property Name="clo_id" Type="int" />
+          <Property Name="marks" Type="int" />
+          <Property Name="paper_id" Type="int" Nullable="false" />
+          <Property Name="isextra" Type="bit" />
+          <Property Name="editor_id" Type="int" />
+        </EntityType>
+        <EntityType Name="Role_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="role_id" Type="int" Nullable="false" />
+          <Property Name="IsTemporary" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="section">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="sessions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+          <Property Name="start_date" Type="date" />
+          <Property Name="end_date" Type="date" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="submission_period">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="session_id" Type="int" Nullable="false" />
+          <Property Name="start_date" Type="date" />
+          <Property Name="end_date" Type="date" />
+        </EntityType>
+        <EntityType Name="topic">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="description" Type="varchar" MaxLength="225" Nullable="false" />
+          <Property Name="course_id" Type="int" Nullable="false" />
+          <Property Name="session_id" Type="int" />
+        </EntityType>
+        <EntityType Name="topic_teach">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_assignment_id" Type="int" Nullable="false" />
+          <Property Name="topic_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="email" Type="varchar" MaxLength="50" />
+          <Property Name="phone_no" Type="varchar" MaxLength="50" />
+          <Property Name="password" Type="varchar" MaxLength="225" Nullable="false" />
+          <Property Name="username" Type="varchar" MaxLength="50" />
+          <Property Name="status" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Vetting_Timming_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="Vetting_Date" Type="date" />
+          <Property Name="Vetting_Time" Type="time" Precision="7" />
+        </EntityType>
+        <Association Name="fk_clo">
+          <End Role="clo" Type="Self.clo" Multiplicity="1" />
+          <End Role="Clo_Weightage" Type="Self.Clo_Weightage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Clo_Weightage">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_clos_session">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="0..1" />
+          <End Role="clo" Type="Self.clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="clo">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_comment">
+          <End Role="Comment" Type="Self.Comment" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Comment">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="comment_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_assignment1">
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="1" />
+          <End Role="topic_teach" Type="Self.topic_teach" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Course_Assignment">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic_teach">
+              <PropertyRef Name="course_assignment_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course2">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="clo" Type="Self.clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="clo">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course3">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="topic" Type="Self.topic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course4">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="Difficulty_level_policy" Type="Self.Difficulty_level_policy" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Difficulty_level_policy">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course5">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course6">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="paper" Type="Self.paper" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DifficultyLevelPolicy_Session">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="0..1" />
+          <End Role="Difficulty_level_policy" Type="Self.Difficulty_level_policy" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Difficulty_level_policy">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_paper">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_paper3">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_clo7">
+          <End Role="clo" Type="Self.clo" Multiplicity="0..1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper2">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper7">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question2">
+          <End Role="Question" Type="Self.Question" Multiplicity="1" />
+          <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_Accept_Reject">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question3">
+          <End Role="Question" Type="Self.Question" Multiplicity="0..1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_receiver">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="receiver_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_role">
+          <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
+          <End Role="Role_Assignment" Type="Self.Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_section">
+          <End Role="section" Type="Self.section" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="section">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="section_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_sender">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="sender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session1">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session3">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="1" />
+          <End Role="paper" Type="Self.paper" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session4">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="1" />
+          <End Role="submission_period" Type="Self.submission_period" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="submission_period">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Topic_Session">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="0..1" />
+          <End Role="topic" Type="Self.topic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_topic1">
+          <End Role="topic" Type="Self.topic" Multiplicity="1" />
+          <End Role="topic_teach" Type="Self.topic_teach" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic_teach">
+              <PropertyRef Name="topic_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Role_Assignment" Type="Self.Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user1">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user2">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user3">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="sender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user4">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="reciever_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user5">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Vetting_Timming_Assignment" Type="Self.Vetting_Timming_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Vetting_Timming_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user6">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="editor_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user7">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="editor_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user8">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_Accept_Reject">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="DirectorDashboardModelStoreContainer">
+          <EntitySet Name="Alert" EntityType="Self.Alert" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="clo" EntityType="Self.clo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Clo_Weightage" EntityType="Self.Clo_Weightage" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Comment" EntityType="Self.Comment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Comment_Paper_Question" EntityType="Self.Comment_Paper_Question" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="course" EntityType="Self.course" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Course_Assignment" EntityType="Self.Course_Assignment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Difficulty_level_policy" EntityType="Self.Difficulty_level_policy" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="paper" EntityType="Self.paper" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="paper_Assignment" EntityType="Self.paper_Assignment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Question" EntityType="Self.Question" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Question_Accept_Reject" EntityType="Self.Question_Accept_Reject" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Question_edited" EntityType="Self.Question_edited" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Role_Assignment" EntityType="Self.Role_Assignment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="section" EntityType="Self.section" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="sessions" EntityType="Self.sessions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="submission_period" EntityType="Self.submission_period" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="topic" EntityType="Self.topic" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="topic_teach" EntityType="Self.topic_teach" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Vetting_Timming_Assignment" EntityType="Self.Vetting_Timming_Assignment" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="fk_clo" Association="Self.fk_clo">
+            <End Role="clo" EntitySet="clo" />
+            <End Role="Clo_Weightage" EntitySet="Clo_Weightage" />
+          </AssociationSet>
+          <AssociationSet Name="FK_clos_session" Association="Self.FK_clos_session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="clo" EntitySet="clo" />
+          </AssociationSet>
+          <AssociationSet Name="fk_comment" Association="Self.fk_comment">
+            <End Role="Comment" EntitySet="Comment" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course" Association="Self.fk_course">
+            <End Role="course" EntitySet="course" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_assignment1" Association="Self.fk_course_assignment1">
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+            <End Role="topic_teach" EntitySet="topic_teach" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course2" Association="Self.fk_course2">
+            <End Role="course" EntitySet="course" />
+            <End Role="clo" EntitySet="clo" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course3" Association="Self.fk_course3">
+            <End Role="course" EntitySet="course" />
+            <End Role="topic" EntitySet="topic" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course4" Association="Self.fk_course4">
+            <End Role="course" EntitySet="course" />
+            <End Role="Difficulty_level_policy" EntitySet="Difficulty_level_policy" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course5" Association="Self.fk_course5">
+            <End Role="course" EntitySet="course" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course6" Association="Self.fk_course6">
+            <End Role="course" EntitySet="course" />
+            <End Role="paper" EntitySet="paper" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DifficultyLevelPolicy_Session" Association="Self.FK_DifficultyLevelPolicy_Session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="Difficulty_level_policy" EntitySet="Difficulty_level_policy" />
+          </AssociationSet>
+          <AssociationSet Name="fk_paper" Association="Self.fk_paper">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Alert" EntitySet="Alert" />
+          </AssociationSet>
+          <AssociationSet Name="fk_paper3" Association="Self.fk_paper3">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_clo7" Association="Self.fk_question_clo7">
+            <End Role="clo" EntitySet="clo" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper" Association="Self.fk_question_paper">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper2" Association="Self.fk_question_paper2">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper7" Association="Self.fk_question_paper7">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question2" Association="Self.fk_question2">
+            <End Role="Question" EntitySet="Question" />
+            <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question3" Association="Self.fk_question3">
+            <End Role="Question" EntitySet="Question" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_receiver" Association="Self.fk_receiver">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_role" Association="Self.fk_role">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_section" Association="Self.fk_section">
+            <End Role="section" EntitySet="section" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_sender" Association="Self.fk_sender">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session" Association="Self.fk_session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session1" Association="Self.fk_session1">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session3" Association="Self.fk_session3">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="paper" EntitySet="paper" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session4" Association="Self.fk_session4">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="submission_period" EntitySet="submission_period" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Topic_Session" Association="Self.FK_Topic_Session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="topic" EntitySet="topic" />
+          </AssociationSet>
+          <AssociationSet Name="fk_topic1" Association="Self.fk_topic1">
+            <End Role="topic" EntitySet="topic" />
+            <End Role="topic_teach" EntitySet="topic_teach" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user" Association="Self.fk_user">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user1" Association="Self.fk_user1">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user2" Association="Self.fk_user2">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user3" Association="Self.fk_user3">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Alert" EntitySet="Alert" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user4" Association="Self.fk_user4">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Alert" EntitySet="Alert" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user5" Association="Self.fk_user5">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Vetting_Timming_Assignment" EntitySet="Vetting_Timming_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user6" Association="Self.fk_user6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user7" Association="Self.fk_user7">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user8" Association="Self.fk_user8">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DirectorDashboardModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Alert">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="sender_id" Type="Int32" Nullable="false" />
+          <Property Name="reciever_id" Type="Int32" Nullable="false" />
+          <Property Name="paper_id" Type="Int32" Nullable="false" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="paper" Relationship="Self.fk_paper" FromRole="Alert" ToRole="paper" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user3" FromRole="Alert" ToRole="Users" />
+          <NavigationProperty Name="User1" Relationship="Self.fk_user4" FromRole="Alert" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="clo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Clo_Weightage" Relationship="Self.fk_clo" FromRole="clo" ToRole="Clo_Weightage" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course2" FromRole="clo" ToRole="course" />
+          <Property Name="session_id" Type="Int32" />
+          <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_clos_session" FromRole="clo" ToRole="session" />
+          <NavigationProperty Name="Questions" Relationship="DirectorDashboardModel.fk_question_clo7" FromRole="clo" ToRole="Question" />
+        </EntityType>
+        <EntityType Name="Clo_Weightage">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="clo_id" Type="Int32" Nullable="false" />
+          <Property Name="term" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="weightage" Type="Int32" />
+          <NavigationProperty Name="clo" Relationship="Self.fk_clo" FromRole="Clo_Weightage" ToRole="clo" />
+        </EntityType>
+        <EntityType Name="Comment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="comment_date" Type="DateTime" Precision="0" />
+          <Property Name="comment_time" Type="Time" Precision="7" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="mark_read" Type="Boolean" />
+          <NavigationProperty Name="Comment_Paper_Question" Relationship="Self.fk_comment" FromRole="Comment" ToRole="Comment_Paper_Question" />
+        </EntityType>
+        <EntityType Name="Comment_Paper_Question">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="comment_id" Type="Int32" Nullable="false" />
+          <Property Name="paper_id" Type="Int32" Nullable="false" />
+          <Property Name="sender_id" Type="Int32" Nullable="false" />
+          <Property Name="receiver_id" Type="Int32" Nullable="false" />
+          <Property Name="question_id" Type="Int32" />
+          <NavigationProperty Name="Comment" Relationship="Self.fk_comment" FromRole="Comment_Paper_Question" ToRole="Comment" />
+          <NavigationProperty Name="paper" Relationship="Self.fk_paper3" FromRole="Comment_Paper_Question" ToRole="paper" />
+          <NavigationProperty Name="Question" Relationship="Self.fk_question3" FromRole="Comment_Paper_Question" ToRole="Question" />
+          <NavigationProperty Name="User" Relationship="Self.fk_receiver" FromRole="Comment_Paper_Question" ToRole="Users" />
+          <NavigationProperty Name="User1" Relationship="Self.fk_sender" FromRole="Comment_Paper_Question" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="course">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="title" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="credit_hours" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="cloes" Relationship="Self.fk_course2" FromRole="course" ToRole="clo" />
+          <NavigationProperty Name="Course_Assignment" Relationship="Self.fk_course" FromRole="course" ToRole="Course_Assignment" />
+          <NavigationProperty Name="topics" Relationship="Self.fk_course3" FromRole="course" ToRole="topic" />
+          <NavigationProperty Name="Difficulty_level_policy" Relationship="Self.fk_course4" FromRole="course" ToRole="Difficulty_level_policy" />
+          <NavigationProperty Name="paper_Assignment" Relationship="Self.fk_course5" FromRole="course" ToRole="paper_Assignment" />
+          <NavigationProperty Name="papers" Relationship="Self.fk_course6" FromRole="course" ToRole="paper" />
+        </EntityType>
+        <EntityType Name="Course_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="section_id" Type="Int32" Nullable="false" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="session_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course" FromRole="Course_Assignment" ToRole="course" />
+          <NavigationProperty Name="topic_teach" Relationship="Self.fk_course_assignment1" FromRole="Course_Assignment" ToRole="topic_teach" />
+          <NavigationProperty Name="section" Relationship="Self.fk_section" FromRole="Course_Assignment" ToRole="section" />
+          <NavigationProperty Name="session" Relationship="Self.fk_session" FromRole="Course_Assignment" ToRole="sessions" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user1" FromRole="Course_Assignment" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Difficulty_level_policy">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <Property Name="eassy_Q" Type="Int32" />
+          <Property Name="medium_Q" Type="Int32" />
+          <Property Name="difficult_Q" Type="Int32" />
+          <Property Name="term" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course4" FromRole="Difficulty_level_policy" ToRole="course" />
+          <Property Name="session_id" Type="Int32" />
+          <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_DifficultyLevelPolicy_Session" FromRole="Difficulty_level_policy" ToRole="session" />
+        </EntityType>
+        <EntityType Name="paper">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="session_id" Type="Int32" Nullable="false" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <Property Name="paper_Date" Type="DateTime" Precision="0" />
+          <Property Name="Start_time" Type="Time" Precision="7" />
+          <Property Name="end_time" Type="Time" Precision="7" />
+          <Property Name="duration" Type="Int32" />
+          <Property Name="degree_programs" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="total_marks" Type="Int32" />
+          <Property Name="teacher_name" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="term" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="no_of_questions" Type="Int32" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Alerts" Relationship="Self.fk_paper" FromRole="paper" ToRole="Alert" />
+          <NavigationProperty Name="Comment_Paper_Question" Relationship="Self.fk_paper3" FromRole="paper" ToRole="Comment_Paper_Question" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course6" FromRole="paper" ToRole="course" />
+          <NavigationProperty Name="session" Relationship="Self.fk_session3" FromRole="paper" ToRole="sessions" />
+          <NavigationProperty Name="Questions" Relationship="DirectorDashboardModel.fk_question_paper" FromRole="paper" ToRole="Question" />
+          <NavigationProperty Name="Questions1" Relationship="DirectorDashboardModel.fk_question_paper2" FromRole="paper" ToRole="Question" />
+          <NavigationProperty Name="Questions2" Relationship="DirectorDashboardModel.fk_question_paper7" FromRole="paper" ToRole="Question" />
+        </EntityType>
+        <EntityType Name="paper_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="session_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course5" FromRole="paper_Assignment" ToRole="course" />
+          <NavigationProperty Name="session" Relationship="Self.fk_session1" FromRole="paper_Assignment" ToRole="sessions" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user2" FromRole="paper_Assignment" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Question">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="text" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="image" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="difficulty_level" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="clo_id" Type="Int32" />
+          <Property Name="marks" Type="Int32" />
+          <Property Name="paper_id" Type="Int32" Nullable="false" />
+          <Property Name="isextra" Type="Boolean" />
+          <Property Name="editor_id" Type="Int32" />
+          <NavigationProperty Name="Comment_Paper_Question" Relationship="Self.fk_question3" FromRole="Question" ToRole="Comment_Paper_Question" />
+          <NavigationProperty Name="Question_Accept_Reject" Relationship="Self.fk_question2" FromRole="Question" ToRole="Question_Accept_Reject" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user6" FromRole="Question" ToRole="Users" />
+          <Property Name="version" Type="Int32" />
+          <NavigationProperty Name="clo" Relationship="DirectorDashboardModel.fk_question_clo7" FromRole="Question" ToRole="clo" />
+          <NavigationProperty Name="paper" Relationship="DirectorDashboardModel.fk_question_paper" FromRole="Question" ToRole="paper" />
+          <NavigationProperty Name="paper1" Relationship="DirectorDashboardModel.fk_question_paper2" FromRole="Question" ToRole="paper" />
+          <NavigationProperty Name="paper2" Relationship="DirectorDashboardModel.fk_question_paper7" FromRole="Question" ToRole="paper" />
+        </EntityType>
+        <EntityType Name="Question_Accept_Reject">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="question_id" Type="Int32" Nullable="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Question" Relationship="Self.fk_question2" FromRole="Question_Accept_Reject" ToRole="Question" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user8" FromRole="Question_Accept_Reject" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Question_edited">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="text" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="image" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="difficulty_level" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="clo_id" Type="Int32" />
+          <Property Name="marks" Type="Int32" />
+          <Property Name="paper_id" Type="Int32" Nullable="false" />
+          <Property Name="isextra" Type="Boolean" />
+          <Property Name="editor_id" Type="Int32" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user7" FromRole="Question_edited" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Role_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="role_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Role" Relationship="Self.fk_role" FromRole="Role_Assignment" ToRole="Roles" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user" FromRole="Role_Assignment" ToRole="Users" />
+          <Property Name="IsTemporary" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Role_Assignment" Relationship="Self.fk_role" FromRole="Roles" ToRole="Role_Assignment" />
+        </EntityType>
+        <EntityType Name="section">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Course_Assignment" Relationship="Self.fk_section" FromRole="section" ToRole="Course_Assignment" />
+        </EntityType>
+        <EntityType Name="session">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="start_date" Type="DateTime" Precision="0" />
+          <Property Name="end_date" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Course_Assignment" Relationship="Self.fk_session" FromRole="sessions" ToRole="Course_Assignment" />
+          <NavigationProperty Name="papers" Relationship="Self.fk_session3" FromRole="sessions" ToRole="paper" />
+          <NavigationProperty Name="paper_Assignment" Relationship="Self.fk_session1" FromRole="sessions" ToRole="paper_Assignment" />
+          <NavigationProperty Name="submission_period" Relationship="Self.fk_session4" FromRole="sessions" ToRole="submission_period" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="cloes" Relationship="DirectorDashboardModel.FK_clos_session" FromRole="session" ToRole="clo" />
+          <NavigationProperty Name="Difficulty_level_policy" Relationship="DirectorDashboardModel.FK_DifficultyLevelPolicy_Session" FromRole="session" ToRole="Difficulty_level_policy" />
+          <NavigationProperty Name="topics" Relationship="DirectorDashboardModel.FK_Topic_Session" FromRole="session" ToRole="topic" />
+        </EntityType>
+        <EntityType Name="submission_period">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="session_id" Type="Int32" Nullable="false" />
+          <Property Name="start_date" Type="DateTime" Precision="0" />
+          <Property Name="end_date" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="session" Relationship="Self.fk_session4" FromRole="submission_period" ToRole="sessions" />
+        </EntityType>
+        <EntityType Name="topic">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="course_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="course" Relationship="Self.fk_course3" FromRole="topic" ToRole="course" />
+          <NavigationProperty Name="topic_teach" Relationship="Self.fk_topic1" FromRole="topic" ToRole="topic_teach" />
+          <Property Name="session_id" Type="Int32" />
+          <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_Topic_Session" FromRole="topic" ToRole="session" />
+        </EntityType>
+        <EntityType Name="topic_teach">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_assignment_id" Type="Int32" Nullable="false" />
+          <Property Name="topic_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Course_Assignment" Relationship="Self.fk_course_assignment1" FromRole="topic_teach" ToRole="Course_Assignment" />
+          <NavigationProperty Name="topic" Relationship="Self.fk_topic1" FromRole="topic_teach" ToRole="topic" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="phone_no" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="password" Type="String" MaxLength="225" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Alerts" Relationship="Self.fk_user3" FromRole="Users" ToRole="Alert" />
+          <NavigationProperty Name="Alerts1" Relationship="Self.fk_user4" FromRole="Users" ToRole="Alert" />
+          <NavigationProperty Name="Comment_Paper_Question" Relationship="Self.fk_receiver" FromRole="Users" ToRole="Comment_Paper_Question" />
+          <NavigationProperty Name="Comment_Paper_Question1" Relationship="Self.fk_sender" FromRole="Users" ToRole="Comment_Paper_Question" />
+          <NavigationProperty Name="Course_Assignment" Relationship="Self.fk_user1" FromRole="Users" ToRole="Course_Assignment" />
+          <NavigationProperty Name="paper_Assignment" Relationship="Self.fk_user2" FromRole="Users" ToRole="paper_Assignment" />
+          <NavigationProperty Name="Questions" Relationship="Self.fk_user6" FromRole="Users" ToRole="Question" />
+          <NavigationProperty Name="Question_Accept_Reject" Relationship="Self.fk_user8" FromRole="Users" ToRole="Question_Accept_Reject" />
+          <NavigationProperty Name="Question_edited" Relationship="Self.fk_user7" FromRole="Users" ToRole="Question_edited" />
+          <NavigationProperty Name="Role_Assignment" Relationship="Self.fk_user" FromRole="Users" ToRole="Role_Assignment" />
+          <NavigationProperty Name="Vetting_Timming_Assignment" Relationship="Self.fk_user5" FromRole="Users" ToRole="Vetting_Timming_Assignment" />
+          <Property Name="status" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Vetting_Timming_Assignment">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="Vetting_Date" Type="DateTime" Precision="0" />
+          <Property Name="Vetting_Time" Type="Time" Precision="7" />
+          <NavigationProperty Name="User" Relationship="Self.fk_user5" FromRole="Vetting_Timming_Assignment" ToRole="Users" />
+        </EntityType>
+        <Association Name="fk_paper">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user3">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="sender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user4">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Alert" Type="Self.Alert" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Alert">
+              <PropertyRef Name="reciever_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_clo">
+          <End Role="clo" Type="Self.clo" Multiplicity="1" />
+          <End Role="Clo_Weightage" Type="Self.Clo_Weightage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Clo_Weightage">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course2">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="clo" Type="Self.clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="clo">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_comment">
+          <End Role="Comment" Type="Self.Comment" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Comment">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="comment_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_paper3">
+          <End Role="paper" Type="Self.paper" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question3">
+          <End Role="Question" Type="Self.Question" Multiplicity="0..1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_receiver">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="receiver_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_sender">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Comment_Paper_Question" Type="Self.Comment_Paper_Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Comment_Paper_Question">
+              <PropertyRef Name="sender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course3">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="topic" Type="Self.topic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course4">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="Difficulty_level_policy" Type="Self.Difficulty_level_policy" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Difficulty_level_policy">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course5">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course6">
+          <End Role="course" Type="Self.course" Multiplicity="1" />
+          <End Role="paper" Type="Self.paper" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_assignment1">
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="1" />
+          <End Role="topic_teach" Type="Self.topic_teach" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Course_Assignment">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic_teach">
+              <PropertyRef Name="course_assignment_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_section">
+          <End Role="section" Type="Self.section" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="section">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="section_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session">
+          <End Role="sessions" Type="Self.session" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user1">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Course_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session3">
+          <End Role="sessions" Type="Self.session" Multiplicity="1" />
+          <End Role="paper" Type="Self.paper" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session1">
+          <End Role="sessions" Type="Self.session" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user2">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="paper_Assignment" Type="Self.paper_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="paper_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question2">
+          <End Role="Question" Type="Self.Question" Multiplicity="1" />
+          <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_Accept_Reject">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user6">
+          <End Role="Users" Type="Self.User" Multiplicity="0..1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="editor_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user8">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_Accept_Reject">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user7">
+          <End Role="Users" Type="Self.User" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="editor_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_role">
+          <End Role="Roles" Type="Self.Role" Multiplicity="1" />
+          <End Role="Role_Assignment" Type="Self.Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Role_Assignment" Type="Self.Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_session4">
+          <End Role="sessions" Type="Self.session" Multiplicity="1" />
+          <End Role="submission_period" Type="Self.submission_period" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="submission_period">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_topic1">
+          <End Role="topic" Type="Self.topic" Multiplicity="1" />
+          <End Role="topic_teach" Type="Self.topic_teach" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic_teach">
+              <PropertyRef Name="topic_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_user5">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Vetting_Timming_Assignment" Type="Self.Vetting_Timming_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Vetting_Timming_Assignment">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="DirectorDashboardEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Alerts" EntityType="Self.Alert" />
+          <EntitySet Name="cloes" EntityType="Self.clo" />
+          <EntitySet Name="Clo_Weightage" EntityType="Self.Clo_Weightage" />
+          <EntitySet Name="Comments" EntityType="Self.Comment" />
+          <EntitySet Name="Comment_Paper_Question" EntityType="Self.Comment_Paper_Question" />
+          <EntitySet Name="courses" EntityType="Self.course" />
+          <EntitySet Name="Course_Assignment" EntityType="Self.Course_Assignment" />
+          <EntitySet Name="Difficulty_level_policy" EntityType="Self.Difficulty_level_policy" />
+          <EntitySet Name="papers" EntityType="Self.paper" />
+          <EntitySet Name="paper_Assignment" EntityType="Self.paper_Assignment" />
+          <EntitySet Name="Questions" EntityType="Self.Question" />
+          <EntitySet Name="Question_Accept_Reject" EntityType="Self.Question_Accept_Reject" />
+          <EntitySet Name="Question_edited" EntityType="Self.Question_edited" />
+          <EntitySet Name="Role_Assignment" EntityType="Self.Role_Assignment" />
+          <EntitySet Name="Roles" EntityType="Self.Role" />
+          <EntitySet Name="sections" EntityType="Self.section" />
+          <EntitySet Name="sessions" EntityType="Self.session" />
+          <EntitySet Name="submission_period" EntityType="Self.submission_period" />
+          <EntitySet Name="topics" EntityType="Self.topic" />
+          <EntitySet Name="topic_teach" EntityType="Self.topic_teach" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <EntitySet Name="Vetting_Timming_Assignment" EntityType="Self.Vetting_Timming_Assignment" />
+          <AssociationSet Name="fk_paper" Association="Self.fk_paper">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Alert" EntitySet="Alerts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user3" Association="Self.fk_user3">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Alert" EntitySet="Alerts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user4" Association="Self.fk_user4">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Alert" EntitySet="Alerts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_clo" Association="Self.fk_clo">
+            <End Role="clo" EntitySet="cloes" />
+            <End Role="Clo_Weightage" EntitySet="Clo_Weightage" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course2" Association="Self.fk_course2">
+            <End Role="course" EntitySet="courses" />
+            <End Role="clo" EntitySet="cloes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_comment" Association="Self.fk_comment">
+            <End Role="Comment" EntitySet="Comments" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_paper3" Association="Self.fk_paper3">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question3" Association="Self.fk_question3">
+            <End Role="Question" EntitySet="Questions" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_receiver" Association="Self.fk_receiver">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_sender" Association="Self.fk_sender">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course" Association="Self.fk_course">
+            <End Role="course" EntitySet="courses" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course3" Association="Self.fk_course3">
+            <End Role="course" EntitySet="courses" />
+            <End Role="topic" EntitySet="topics" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course4" Association="Self.fk_course4">
+            <End Role="course" EntitySet="courses" />
+            <End Role="Difficulty_level_policy" EntitySet="Difficulty_level_policy" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course5" Association="Self.fk_course5">
+            <End Role="course" EntitySet="courses" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course6" Association="Self.fk_course6">
+            <End Role="course" EntitySet="courses" />
+            <End Role="paper" EntitySet="papers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_assignment1" Association="Self.fk_course_assignment1">
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+            <End Role="topic_teach" EntitySet="topic_teach" />
+          </AssociationSet>
+          <AssociationSet Name="fk_section" Association="Self.fk_section">
+            <End Role="section" EntitySet="sections" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session" Association="Self.fk_session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user1" Association="Self.fk_user1">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Course_Assignment" EntitySet="Course_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session3" Association="Self.fk_session3">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="paper" EntitySet="papers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session1" Association="Self.fk_session1">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user2" Association="Self.fk_user2">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="paper_Assignment" EntitySet="paper_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question2" Association="Self.fk_question2">
+            <End Role="Question" EntitySet="Questions" />
+            <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user6" Association="Self.fk_user6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user8" Association="Self.fk_user8">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user7" Association="Self.fk_user7">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="fk_role" Association="Self.fk_role">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user" Association="Self.fk_user">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="fk_session4" Association="Self.fk_session4">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="submission_period" EntitySet="submission_period" />
+          </AssociationSet>
+          <AssociationSet Name="fk_topic1" Association="Self.fk_topic1">
+            <End Role="topic" EntitySet="topics" />
+            <End Role="topic_teach" EntitySet="topic_teach" />
+          </AssociationSet>
+          <AssociationSet Name="fk_user5" Association="Self.fk_user5">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Vetting_Timming_Assignment" EntitySet="Vetting_Timming_Assignment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_clos_session" Association="DirectorDashboardModel.FK_clos_session">
+            <End Role="session" EntitySet="sessions" />
+            <End Role="clo" EntitySet="cloes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_clo7" Association="DirectorDashboardModel.fk_question_clo7">
+            <End Role="clo" EntitySet="cloes" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DifficultyLevelPolicy_Session" Association="DirectorDashboardModel.FK_DifficultyLevelPolicy_Session">
+            <End Role="session" EntitySet="sessions" />
+            <End Role="Difficulty_level_policy" EntitySet="Difficulty_level_policy" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper" Association="DirectorDashboardModel.fk_question_paper">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper2" Association="DirectorDashboardModel.fk_question_paper2">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_paper7" Association="DirectorDashboardModel.fk_question_paper7">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Topic_Session" Association="DirectorDashboardModel.FK_Topic_Session">
+            <End Role="session" EntitySet="sessions" />
+            <End Role="topic" EntitySet="topics" />
+          </AssociationSet>
+        </EntityContainer>
+        <Association Name="FK_clos_session">
+          <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.clo" Role="clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="session">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="clo">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_clo7">
+          <End Type="DirectorDashboardModel.clo" Role="clo" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DifficultyLevelPolicy_Session">
+          <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Difficulty_level_policy" Role="Difficulty_level_policy" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="session">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Difficulty_level_policy">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper">
+          <End Type="DirectorDashboardModel.paper" Role="paper" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper2">
+          <End Type="DirectorDashboardModel.paper" Role="paper" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_paper7">
+          <End Type="DirectorDashboardModel.paper" Role="paper" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Topic_Session">
+          <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.topic" Role="topic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="session">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="topic">
+              <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DirectorDashboardModelStoreContainer" CdmEntityContainer="DirectorDashboardEntities">
+          <EntitySetMapping Name="Alerts">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Alert">
+              <MappingFragment StoreEntitySet="Alert">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="sender_id" ColumnName="sender_id" />
+                <ScalarProperty Name="reciever_id" ColumnName="reciever_id" />
+                <ScalarProperty Name="paper_id" ColumnName="paper_id" />
+                <ScalarProperty Name="description" ColumnName="description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cloes">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.clo">
+              <MappingFragment StoreEntitySet="clo">
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clo_Weightage">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Clo_Weightage">
+              <MappingFragment StoreEntitySet="Clo_Weightage">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="clo_id" ColumnName="clo_id" />
+                <ScalarProperty Name="term" ColumnName="term" />
+                <ScalarProperty Name="weightage" ColumnName="weightage" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Comments">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Comment">
+              <MappingFragment StoreEntitySet="Comment">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="comment_date" ColumnName="comment_date" />
+                <ScalarProperty Name="comment_time" ColumnName="comment_time" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="mark_read" ColumnName="mark_read" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Comment_Paper_Question">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Comment_Paper_Question">
+              <MappingFragment StoreEntitySet="Comment_Paper_Question">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="comment_id" ColumnName="comment_id" />
+                <ScalarProperty Name="paper_id" ColumnName="paper_id" />
+                <ScalarProperty Name="sender_id" ColumnName="sender_id" />
+                <ScalarProperty Name="receiver_id" ColumnName="receiver_id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="courses">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.course">
+              <MappingFragment StoreEntitySet="course">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_code" ColumnName="course_code" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="credit_hours" ColumnName="credit_hours" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Course_Assignment">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Course_Assignment">
+              <MappingFragment StoreEntitySet="Course_Assignment">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="section_id" ColumnName="section_id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Difficulty_level_policy">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Difficulty_level_policy">
+              <MappingFragment StoreEntitySet="Difficulty_level_policy">
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="eassy_Q" ColumnName="eassy_Q" />
+                <ScalarProperty Name="medium_Q" ColumnName="medium_Q" />
+                <ScalarProperty Name="difficult_Q" ColumnName="difficult_Q" />
+                <ScalarProperty Name="term" ColumnName="term" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="papers">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.paper">
+              <MappingFragment StoreEntitySet="paper">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="paper_Date" ColumnName="paper_Date" />
+                <ScalarProperty Name="Start_time" ColumnName="Start_time" />
+                <ScalarProperty Name="end_time" ColumnName="end_time" />
+                <ScalarProperty Name="duration" ColumnName="duration" />
+                <ScalarProperty Name="degree_programs" ColumnName="degree_programs" />
+                <ScalarProperty Name="total_marks" ColumnName="total_marks" />
+                <ScalarProperty Name="teacher_name" ColumnName="teacher_name" />
+                <ScalarProperty Name="term" ColumnName="term" />
+                <ScalarProperty Name="no_of_questions" ColumnName="no_of_questions" />
+                <ScalarProperty Name="status" ColumnName="status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="paper_Assignment">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.paper_Assignment">
+              <MappingFragment StoreEntitySet="paper_Assignment">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Questions">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Question">
+              <MappingFragment StoreEntitySet="Question">
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="text" ColumnName="text" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="image" ColumnName="image" />
+                <ScalarProperty Name="difficulty_level" ColumnName="difficulty_level" />
+                <ScalarProperty Name="clo_id" ColumnName="clo_id" />
+                <ScalarProperty Name="marks" ColumnName="marks" />
+                <ScalarProperty Name="paper_id" ColumnName="paper_id" />
+                <ScalarProperty Name="isextra" ColumnName="isextra" />
+                <ScalarProperty Name="editor_id" ColumnName="editor_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Question_Accept_Reject">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Question_Accept_Reject">
+              <MappingFragment StoreEntitySet="Question_Accept_Reject">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="status" ColumnName="status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Question_edited">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Question_edited">
+              <MappingFragment StoreEntitySet="Question_edited">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="text" ColumnName="text" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="image" ColumnName="image" />
+                <ScalarProperty Name="difficulty_level" ColumnName="difficulty_level" />
+                <ScalarProperty Name="clo_id" ColumnName="clo_id" />
+                <ScalarProperty Name="marks" ColumnName="marks" />
+                <ScalarProperty Name="paper_id" ColumnName="paper_id" />
+                <ScalarProperty Name="isextra" ColumnName="isextra" />
+                <ScalarProperty Name="editor_id" ColumnName="editor_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Role_Assignment">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Role_Assignment">
+              <MappingFragment StoreEntitySet="Role_Assignment">
+                <ScalarProperty Name="IsTemporary" ColumnName="IsTemporary" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Role">
+              <MappingFragment StoreEntitySet="Roles">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sections">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.section">
+              <MappingFragment StoreEntitySet="section">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sessions">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.session">
+              <MappingFragment StoreEntitySet="sessions">
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="start_date" ColumnName="start_date" />
+                <ScalarProperty Name="end_date" ColumnName="end_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="submission_period">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.submission_period">
+              <MappingFragment StoreEntitySet="submission_period">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+                <ScalarProperty Name="start_date" ColumnName="start_date" />
+                <ScalarProperty Name="end_date" ColumnName="end_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="topics">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.topic">
+              <MappingFragment StoreEntitySet="topic">
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="topic_teach">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.topic_teach">
+              <MappingFragment StoreEntitySet="topic_teach">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_assignment_id" ColumnName="course_assignment_id" />
+                <ScalarProperty Name="topic_id" ColumnName="topic_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.User">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="phone_no" ColumnName="phone_no" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="username" ColumnName="username" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Vetting_Timming_Assignment">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.Vetting_Timming_Assignment">
+              <MappingFragment StoreEntitySet="Vetting_Timming_Assignment">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="Vetting_Date" ColumnName="Vetting_Date" />
+                <ScalarProperty Name="Vetting_Time" ColumnName="Vetting_Time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
