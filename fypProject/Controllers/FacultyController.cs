@@ -13,6 +13,7 @@ namespace fypProject.Controllers
         private DirectorDashboardEntities db = new DirectorDashboardEntities();
 
 
+
         [HttpPost]
         [Route("api/faculty/add-teacher")]
         public HttpResponseMessage AddTeacher([FromBody] AddTeacherDto request)
@@ -22,11 +23,7 @@ namespace fypProject.Controllers
                 if (request == null)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid request data");
 
-                if (!ModelState.IsValid)
-                    return Request.CreateResponse(
-                        HttpStatusCode.BadRequest,
-                        "Name, Email, Username and Password are required"
-                    );
+
 
                 // BIIT email validation
                 var emailPattern = @"^[a-zA-Z0-9._%+-]+@biit\.edu\.pk$";
@@ -42,8 +39,6 @@ namespace fypProject.Controllers
                 if (db.Users.Any(u => u.email == request.email))
                     return Request.CreateResponse(HttpStatusCode.Conflict, "Email already exists");
 
-                if (db.Users.Any(u => u.username == request.username))
-                    return Request.CreateResponse(HttpStatusCode.Conflict, "Username must be unique");
 
                 // Map DTO → User
                 var user = new User
@@ -51,7 +46,7 @@ namespace fypProject.Controllers
                     name = request.name,
                     email = request.email,
                     phone_no = request.phone,   // nullable ✔
-                    username = request.username,
+                    designation = request.designation,
                     password = PasswordHelper.HashPassword(request.password),
                     status = true
                 };
@@ -91,50 +86,6 @@ namespace fypProject.Controllers
 
 
 
-        //[HttpGet]
-        //[Route("api/faculty/get_teachers")]
-        //public HttpResponseMessage GetTeachers(int page = 1, int pageSize = 10)
-        //{
-        //    try
-        //    {
-        //        var role = db.Roles.FirstOrDefault(r => r.name == "Faculty");
-        //        if (role == null)
-        //            return Request.CreateResponse(HttpStatusCode.NotFound, "Faculty role not found");
-
-        //        var query = from u in db.Users
-        //                    join ra in db.Role_Assignment on u.id equals ra.user_id
-        //                    where ra.role_id == role.id && u.status == true 
-        //                    select new TeacherDto
-        //                    {
-        //                        Id = u.id,
-        //                        Name = u.name,
-        //                        Email = u.email,
-        //                        Phone = u.phone_no,
-        //                        Username = u.username
-        //                    };
-
-        //        var totalCount = query.Count();
-
-        //        var teachers = query
-        //            .OrderBy(t => t.Name)
-        //            .Skip((page - 1) * pageSize)
-        //            .Take(pageSize)
-        //            .ToList();
-
-        //        return Request.CreateResponse(HttpStatusCode.OK, new
-        //        {
-        //            data = teachers,
-        //            total = totalCount,
-        //            page,
-        //            pageSize
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
-        //    }
-        //}
-
         [HttpGet]
         [Route("api/faculty/get_teachers")]
         public HttpResponseMessage GetTeachers(int page = 1, int pageSize = 10)
@@ -143,41 +94,23 @@ namespace fypProject.Controllers
             {
                 var role = db.Roles.FirstOrDefault(r => r.name == "Faculty");
                 if (role == null)
-                {
-                    return Request.CreateResponse(
-                        HttpStatusCode.NotFound,
-                        "Faculty role not found"
-                    );
-                }
+                    return Request.CreateResponse(HttpStatusCode.NotFound, "Faculty role not found");
 
-                // 🔹 Base query (JOIN)
                 var query = from u in db.Users
-                            join ra in db.Role_Assignment
-                                on u.id equals ra.user_id
-                            where ra.role_id == role.id
-                                  && u.status == true
+                            join ra in db.Role_Assignment on u.id equals ra.user_id
+                            where ra.role_id == role.id && u.status == true
                             select new TeacherDto
                             {
                                 Id = u.id,
                                 Name = u.name,
                                 Email = u.email,
                                 Phone = u.phone_no,
-                                Username = u.username
+                                Designation = u.designation
                             };
 
-                //// 🔹 REMOVE DUPLICATES (IMPORTANT FIX)
-                //var distinctQuery = query
-                //    .GroupBy(t => t.Id)
-                //    .Select(g => g.First());
-                var distinctQuery = query
-    .ToList()              // pehle data memory me lao
-    .GroupBy(t => t.Id)
-    .Select(g => g.First());
+                var totalCount = query.Count();
 
-                var totalCount = distinctQuery.Count();
-
-                // 🔹 PAGINATION
-                var teachers = distinctQuery
+                var teachers = query
                     .OrderBy(t => t.Name)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -187,18 +120,16 @@ namespace fypProject.Controllers
                 {
                     data = teachers,
                     total = totalCount,
-                    page = page,
-                    pageSize = pageSize
+                    page,
+                    pageSize
                 });
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(
-                    HttpStatusCode.InternalServerError,
-                    ex.Message
-                );
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
 
 
         [HttpPost]
@@ -215,12 +146,11 @@ namespace fypProject.Controllers
                     return Request.CreateResponse(HttpStatusCode.NotFound, "Teacher not found");
 
                 if (string.IsNullOrWhiteSpace(request.Name) ||
-                    string.IsNullOrWhiteSpace(request.Email) ||
-                    string.IsNullOrWhiteSpace(request.Username))
+                    string.IsNullOrWhiteSpace(request.Email))
                 {
                     return Request.CreateResponse(
                         HttpStatusCode.BadRequest,
-                        "Name, Email and Username are required"
+                        "Name and Email  are required"
                     );
                 }
 
@@ -231,12 +161,11 @@ namespace fypProject.Controllers
                 if (db.Users.Any(u => u.email == request.Email && u.id != request.Id))
                     return Request.CreateResponse(HttpStatusCode.Conflict, "Email already exists");
 
-                if (db.Users.Any(u => u.username == request.Username && u.id != request.Id))
-                    return Request.CreateResponse(HttpStatusCode.Conflict, "Username must be unique");
+
 
                 user.name = request.Name.Trim();
                 user.email = request.Email.Trim();
-                user.username = request.Username.Trim();
+                user.designation = request.Designation;
                 user.phone_no = request.Phone;
 
                 db.SaveChanges();
@@ -249,9 +178,9 @@ namespace fypProject.Controllers
             }
         }
 
-        
-   
-       
+
+
+
         [HttpPost]
         [Route("api/faculty/delete_teacher/{id}")]
         public HttpResponseMessage DeleteTeacher(int id)
@@ -262,7 +191,7 @@ namespace fypProject.Controllers
                 if (user == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "Teacher not found");
 
-                
+
                 user.status = false;
                 db.SaveChanges();
 
@@ -274,7 +203,7 @@ namespace fypProject.Controllers
             }
         }
 
-       
+
         [HttpPost]
         [Route("api/faculty/restore_teacher/{id}")]
         public HttpResponseMessage RestoreTeacher(int id)
@@ -312,7 +241,7 @@ namespace fypProject.Controllers
                 if (string.IsNullOrWhiteSpace(search))
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Search term is required.");
 
-               
+
                 var role = db.Roles.FirstOrDefault(r => r.name.ToLower() == "faculty");
                 if (role == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "Faculty role not found.");
@@ -330,7 +259,7 @@ namespace fypProject.Controllers
           Name = u.name,
           Email = u.email,
           Phone = u.phone_no,
-          Username = u.username
+          Designation = u.designation
       })
       .Take(9)
       .ToList();
@@ -350,3 +279,4 @@ namespace fypProject.Controllers
 
     }
 }
+

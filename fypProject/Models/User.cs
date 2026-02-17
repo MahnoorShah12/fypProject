@@ -37,6 +37,7 @@ namespace fypProject.Models
         public string password { get; set; }
         public string username { get; set; }
         public bool status { get; set; }
+        public string designation { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Alert> Alerts { get; set; }
