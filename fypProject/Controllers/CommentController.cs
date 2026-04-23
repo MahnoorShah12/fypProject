@@ -1,11 +1,12 @@
 ﻿using fypProject.Models;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Net.Http;
 using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 using WebGrease.Css.Ast.Selectors;
-using System;
 
 namespace fypProject.Controllers
 {
@@ -17,6 +18,7 @@ namespace fypProject.Controllers
         private DirectorDashboardEntities db = new DirectorDashboardEntities();
 
 
+
         [HttpPost]
         [Route("api/comment/add")]
         public HttpResponseMessage AddComment([FromBody] AddCommentRequestDto request)
@@ -26,33 +28,28 @@ namespace fypProject.Controllers
                 if (request == null || string.IsNullOrWhiteSpace(request.Description))
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid request data");
 
+                // 1️⃣ Get sender from database
                 var sender = db.Users.FirstOrDefault(u => u.id == request.SenderId);
                 if (sender == null)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Sender not found");
 
-             
-                var receiver = db.Users.FirstOrDefault(u => u.id == request.ReceiverId);
-                if (receiver == null)
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Receiver not found");
-
-                
+                // 2️⃣ Validate paper
                 var paper = db.papers.FirstOrDefault(p => p.id == request.PaperId);
                 if (paper == null)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Paper not found");
 
-               
+                // 3️⃣ Validate question if provided
                 if (request.QuestionId.HasValue)
                 {
                     var question = db.Questions.FirstOrDefault(q => q.id == request.QuestionId.Value);
                     if (question == null)
                         return Request.CreateResponse(HttpStatusCode.BadRequest, "Question not found");
 
-                
                     if (question.paper_id != request.PaperId)
                         return Request.CreateResponse(HttpStatusCode.BadRequest, "Question does not belong to this paper");
                 }
 
-                
+                // 4️⃣ Create comment
                 var newComment = new Comment
                 {
                     description = request.Description,
@@ -61,13 +58,28 @@ namespace fypProject.Controllers
                     mark_read = false
                 };
                 db.Comments.Add(newComment);
-                db.SaveChanges(); 
+                db.SaveChanges();
+
+                // 5️⃣ Get receiver from paper assignment
+                var activeSession = db.sessions.FirstOrDefault(s => s.Active);
+                if (activeSession == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "No active session found");
+
+                var paperCreator = db.paper_Assignment
+                                     .FirstOrDefault(pa => pa.course_id == paper.course_id
+                                                        && pa.session_id == activeSession.id);
+                if (paperCreator == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "No user found who created this paper in active session");
+
+                int receiverId = paperCreator.user_id;
+
+                // 6️⃣ Link comment
                 var link = new Comment_Paper_Question
                 {
                     comment_id = newComment.id,
-                    paper_id = request.PaperId,
-                    sender_id = request.SenderId,
-                    receiver_id = request.ReceiverId,
+                    paper_id = paper.id,
+                    sender_id = sender.id,        // Use sender from DB
+                    receiver_id = receiverId,     // Receiver from paper assignment
                     question_id = request.QuestionId
                 };
                 db.Comment_Paper_Question.Add(link);
@@ -77,7 +89,7 @@ namespace fypProject.Controllers
                 {
                     message = "Comment added successfully",
                     CommentId = newComment.id,
-                    CommentPaperQuestionId = link.id
+                    ReceiverId = receiverId
                 });
             }
             catch (Exception ex)
@@ -85,160 +97,125 @@ namespace fypProject.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        [HttpGet]
         [Route("api/comment/get_by_paper/{paperId}")]
-        public HttpResponseMessage GetCommentsByPaper(int paperId)
+        public IHttpActionResult GetCommentsByPaper(int paperId)
         {
             try
             {
-             
-                var paper = db.papers.FirstOrDefault(p => p.id == paperId);
-                if (paper == null)
-                    return Request.CreateResponse(HttpStatusCode.NotFound, "Paper not found");
+                var paperExists = db.papers.Any(p => p.id == paperId);
+                if (!paperExists)
+                    return NotFound();
 
-               
-                var comments = db.Comment_Paper_Question
-                                 .Where(c => c.paper_id == paperId)
-                                 .Select(c => new
-                                 {
-                                     c.id,
-                                     CommentText = c.Comment.description,
-                                     c.comment_id,
-                                     SenderId = c.sender_id,
-                                     SenderName = c.User.name,
-                                     SenderRole = db.Role_Assignment
-                                                    .Where(r => r.user_id == c.sender_id)
-                                                    .Join(db.Roles,
-                                                          ra => ra.role_id,
-                                                          role => role.id,
-                                                          (ra, role) => role.name)
-                                                    .FirstOrDefault(),
-                                     ReceiverId = c.receiver_id,
-                                     ReceiverName = c.User1.name,
-                                     c.question_id,
-                                     c.paper_id
-                                 })
-                                 .ToList();
+                var comments = (from cpq in db.Comment_Paper_Question
+                                join c in db.Comments on cpq.comment_id equals c.id
+                                join sender in db.Users on cpq.sender_id equals sender.id
+                                join receiver in db.Users
+                                    on cpq.receiver_id equals receiver.id into receiverGroup
+                                from receiver in receiverGroup.DefaultIfEmpty()
+                                where cpq.paper_id == paperId
+                                orderby c.comment_date ascending, c.comment_time ascending
+                                select new
+                                {
+                                    Id = cpq.id,
+                                    CommentId = c.id,
+                                    Text = c.description,
+                                    CommentDate = c.comment_date,
+                                    CommentTime = c.comment_time,
+                                    IsRead = c.mark_read,
 
-                return Request.CreateResponse(HttpStatusCode.OK, comments);
+                                    SenderId = sender.id,
+                                    SenderName = sender.name,
+
+                                    ReceiverId = receiver != null ? (int?)receiver.id : null,
+                                    ReceiverName = receiver != null ? receiver.name : null,
+
+                                    QuestionId = cpq.question_id,
+                                    PaperId = cpq.paper_id
+                                })
+                    .AsNoTracking()
+                    .ToList();
+
+
+                // ✅ Combine Date + TimeSpan in memory
+                var result = comments.Select(c => new
+                {
+                    c.Id,
+                    c.CommentId,
+                    c.Text,
+                    CreatedAt = c.CommentDate.HasValue && c.CommentTime.HasValue
+                                ? c.CommentDate.Value.Add(c.CommentTime.Value).ToString("s")
+                                : null,
+                    c.IsRead,
+                    c.SenderId,
+                    c.SenderName,
+                    c.ReceiverId,
+                    c.ReceiverName,
+                    c.QuestionId,
+                    c.PaperId
+                }).ToList();
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+                return InternalServerError(ex);
             }
         }
+
+
+
+
 
         [HttpGet]
-        [Route("api/comment/get_by_question/{paperId}/{questionId}")]
-        public HttpResponseMessage GetCommentsByQuestion(int paperId, int questionId)
+        [Route("api/comment/get_by_question/{questionId}")]
+        public IHttpActionResult GetCommentsByQuestion(int questionId)
         {
             try
             {
-                var paper = db.papers.FirstOrDefault(p => p.id == paperId);
-                if (paper == null)
-                    return Request.CreateResponse(HttpStatusCode.NotFound, "Paper not found");
+                var questionExists = db.Questions.Any(q => q.id == questionId);
+                if (!questionExists)
+                    return BadRequest("Question not found");
 
-              
-                var question = db.Questions.FirstOrDefault(q => q.id == questionId && q.paper_id == paperId);
-                if (question == null)
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Question not found or does not belong to this paper");
+                var commentsQuery = from cpq in db.Comment_Paper_Question
+                                    join c in db.Comments on cpq.comment_id equals c.id
+                                    join sender in db.Users on cpq.sender_id equals sender.id
+                                    join receiver in db.Users on cpq.receiver_id equals receiver.id into recv
+                                    from receiver in recv.DefaultIfEmpty()
+                                    join ra in db.Role_Assignment on sender.id equals ra.user_id into roleAssign
+                                    from ra in roleAssign.DefaultIfEmpty()
+                                    join role in db.Roles on ra.role_id equals role.id into roles
+                                    from role in roles.DefaultIfEmpty()
+                                    where cpq.question_id == questionId
+                                    orderby c.comment_date descending, c.comment_time descending
+                                    select new
+                                    {
+                                        cpq.id,
+                                        CommentId = c.id,
+                                        CommentText = c.description,
+                                        CommentDate = c.comment_date,
+                                        CommentTime = c.comment_time,
+                                        MarkRead = c.mark_read,
+                                        SenderId = sender.id,
+                                        SenderName = sender.name,
+                                        SenderRole = role != null ? role.name : null,
+                                        ReceiverId = receiver != null ? (int?)receiver.id : null,
+                                        ReceiverName = receiver != null ? receiver.name : null,
+                                        cpq.paper_id,
+                                        cpq.question_id
+                                    };
 
-                
-                var comments = db.Comment_Paper_Question
-                                 .Where(c => c.paper_id == paperId && c.question_id == questionId)
-                                 .Select(c => new
-                                 {
-                                     c.id,
-                                     CommentText = c.Comment.description,
-                                     c.comment_id,
-                                     SenderId = c.sender_id,
-                                     SenderName = c.User.name,
-                                     SenderRole = db.Role_Assignment
-                                                    .Where(r => r.user_id == c.sender_id)
-                                                    .Join(db.Roles,
-                                                          ra => ra.role_id,
-                                                          role => role.id,
-                                                          (ra, role) => role.name)
-                                                    .FirstOrDefault(),
-                                     ReceiverId = c.receiver_id,
-                                     ReceiverName = c.User1.name,
-                                     c.paper_id,
-                                     c.question_id
-                                 })
-                                 .ToList();
+                // Remove duplicates by CommentId
+                var comments = commentsQuery
+                               .GroupBy(c => c.CommentId)
+                               .Select(g => g.FirstOrDefault())
+                               .ToList();
 
-                return Request.CreateResponse(HttpStatusCode.OK, comments);
+                return Json(comments); // return JSON for React frontend
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+                return InternalServerError(ex);
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
 }

@@ -24,7 +24,7 @@ namespace fypProject.Models
         public string SessionName { get; set; }
         public object Questions { get; set; }
 
-
+        public int CourseId { get; set; }
 
 
     }

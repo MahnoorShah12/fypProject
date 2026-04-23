@@ -10,11 +10,12 @@ namespace fypProject.Models
 
 
 
-        public int SessionId { get; set; }
+        public int? SessionId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int SenderId { get; set; }
 
+        public int? paper_id { get; set; }
 
     }
 

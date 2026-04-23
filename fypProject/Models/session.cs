@@ -24,6 +24,7 @@ namespace fypProject.Models
             this.cloes = new HashSet<clo>();
             this.Difficulty_level_policy = new HashSet<Difficulty_level_policy>();
             this.topics = new HashSet<topic>();
+            this.TeacherFreeSlots = new HashSet<TeacherFreeSlot>();
         }
     
         public int id { get; set; }
@@ -46,5 +47,7 @@ namespace fypProject.Models
         public virtual ICollection<Difficulty_level_policy> Difficulty_level_policy { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<topic> topics { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TeacherFreeSlot> TeacherFreeSlots { get; set; }
     }
 }

@@ -65,6 +65,12 @@
         <AssociationConnector Association="DirectorDashboardModel.fk_question_paper2" />
         <AssociationConnector Association="DirectorDashboardModel.fk_question_paper7" />
         <AssociationConnector Association="DirectorDashboardModel.FK_Topic_Session" />
+        <EntityTypeShape EntityType="DirectorDashboardModel.department" Width="1.5" PointX="0.75" PointY="2.375" />
+        <AssociationConnector Association="DirectorDashboardModel.FK_courses_departments" />
+        <AssociationConnector Association="DirectorDashboardModel.FK_roleassignment_department" />
+        <EntityTypeShape EntityType="DirectorDashboardModel.TeacherFreeSlot" Width="1.5" PointX="8" PointY="6.375" />
+        <AssociationConnector Association="DirectorDashboardModel.FK_TeacherFreeSlots_Session" />
+        <AssociationConnector Association="DirectorDashboardModel.FK_TeacherFreeSlots_User" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

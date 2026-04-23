@@ -7,12 +7,17 @@ namespace fypProject.Models
 {
     public class VettingGroupDto
     {
-        public int SenderId { get; set; }
-        public DateTime VettingDate { get; set; }
-        public string VettingTime { get; set; }
-
-
+        public int? SessionId { get; set; }   // optional
         public string NameStart { get; set; }
         public string NameEnd { get; set; }
+
+        // Make nullable to avoid default date
+        public DateTime? VettingDate { get; set; }
+
+        // Optional time
+        public string VettingTime { get; set; }
+
+        public int SenderId { get; set; }
+        public List<int> TeacherIds { get; set; }
     }
 }

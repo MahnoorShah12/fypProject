@@ -28,6 +28,7 @@ namespace fypProject.Models
             this.Question_edited = new HashSet<Question_edited>();
             this.Role_Assignment = new HashSet<Role_Assignment>();
             this.Vetting_Timming_Assignment = new HashSet<Vetting_Timming_Assignment>();
+            this.TeacherFreeSlots = new HashSet<TeacherFreeSlot>();
         }
     
         public int id { get; set; }
@@ -61,5 +62,7 @@ namespace fypProject.Models
         public virtual ICollection<Role_Assignment> Role_Assignment { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Vetting_Timming_Assignment> Vetting_Timming_Assignment { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TeacherFreeSlot> TeacherFreeSlots { get; set; }
     }
 }

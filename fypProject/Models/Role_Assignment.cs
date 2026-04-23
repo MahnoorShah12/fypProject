@@ -18,8 +18,10 @@ namespace fypProject.Models
         public int user_id { get; set; }
         public int role_id { get; set; }
         public bool IsTemporary { get; set; }
+        public Nullable<int> department_id { get; set; }
     
         public virtual Role Role { get; set; }
         public virtual User User { get; set; }
+        public virtual department department { get; set; }
     }
 }

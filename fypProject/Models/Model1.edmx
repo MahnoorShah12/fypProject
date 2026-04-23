@@ -62,6 +62,7 @@
           <Property Name="course_code" Type="varchar" MaxLength="50" />
           <Property Name="title" Type="varchar" MaxLength="225" />
           <Property Name="credit_hours" Type="varchar" MaxLength="50" />
+          <Property Name="department_id" Type="int" />
         </EntityType>
         <EntityType Name="Course_Assignment">
           <Key>
@@ -72,6 +73,13 @@
           <Property Name="course_id" Type="int" Nullable="false" />
           <Property Name="user_id" Type="int" Nullable="false" />
           <Property Name="session_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="departments">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="Difficulty_level_policy">
           <Key>
@@ -160,6 +168,7 @@
           <Property Name="user_id" Type="int" Nullable="false" />
           <Property Name="role_id" Type="int" Nullable="false" />
           <Property Name="IsTemporary" Type="bit" Nullable="false" />
+          <Property Name="department_id" Type="int" />
         </EntityType>
         <EntityType Name="Roles">
           <Key>
@@ -193,6 +202,18 @@
           <Property Name="session_id" Type="int" Nullable="false" />
           <Property Name="start_date" Type="date" />
           <Property Name="end_date" Type="date" />
+        </EntityType>
+        <EntityType Name="TeacherFreeSlots">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="SessionId" Type="int" Nullable="false" />
+          <Property Name="Day" Type="varchar" MaxLength="50" />
+          <Property Name="StartTime" Type="varchar" MaxLength="50" />
+          <Property Name="EndTime" Type="varchar" MaxLength="50" />
+          <Property Name="CreatedAt" Type="datetime" />
         </EntityType>
         <EntityType Name="topic">
           <Key>
@@ -232,6 +253,7 @@
           <Property Name="user_id" Type="int" Nullable="false" />
           <Property Name="Vetting_Date" Type="date" />
           <Property Name="Vetting_Time" Type="time" Precision="7" />
+          <Property Name="session_id" Type="int" />
         </EntityType>
         <Association Name="fk_clo">
           <End Role="clo" Type="Self.clo" Multiplicity="1" />
@@ -350,6 +372,18 @@
             </Principal>
             <Dependent Role="paper">
               <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_courses_departments">
+          <End Role="departments" Type="Self.departments" Multiplicity="0..1" />
+          <End Role="course" Type="Self.course" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course">
+              <PropertyRef Name="department_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -485,6 +519,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_roleassignment_department">
+          <End Role="departments" Type="Self.departments" Multiplicity="0..1" />
+          <End Role="Role_Assignment" Type="Self.Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_section">
           <End Role="section" Type="Self.section" Multiplicity="1" />
           <End Role="Course_Assignment" Type="Self.Course_Assignment" Multiplicity="*" />
@@ -554,6 +600,30 @@
             </Principal>
             <Dependent Role="submission_period">
               <PropertyRef Name="session_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TeacherFreeSlots_Session">
+          <End Role="sessions" Type="Self.sessions" Multiplicity="1" />
+          <End Role="TeacherFreeSlots" Type="Self.TeacherFreeSlots" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="sessions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TeacherFreeSlots">
+              <PropertyRef Name="SessionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TeacherFreeSlots_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="TeacherFreeSlots" Type="Self.TeacherFreeSlots" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TeacherFreeSlots">
+              <PropertyRef Name="UserId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -697,6 +767,7 @@
           <EntitySet Name="Comment_Paper_Question" EntityType="Self.Comment_Paper_Question" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="course" EntityType="Self.course" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Course_Assignment" EntityType="Self.Course_Assignment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="departments" EntityType="Self.departments" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Difficulty_level_policy" EntityType="Self.Difficulty_level_policy" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="paper" EntityType="Self.paper" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="paper_Assignment" EntityType="Self.paper_Assignment" Schema="dbo" store:Type="Tables" />
@@ -708,6 +779,7 @@
           <EntitySet Name="section" EntityType="Self.section" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sessions" EntityType="Self.sessions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="submission_period" EntityType="Self.submission_period" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TeacherFreeSlots" EntityType="Self.TeacherFreeSlots" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="topic" EntityType="Self.topic" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="topic_teach" EntityType="Self.topic_teach" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
@@ -751,6 +823,10 @@
           <AssociationSet Name="fk_course6" Association="Self.fk_course6">
             <End Role="course" EntitySet="course" />
             <End Role="paper" EntitySet="paper" />
+          </AssociationSet>
+          <AssociationSet Name="FK_courses_departments" Association="Self.FK_courses_departments">
+            <End Role="departments" EntitySet="departments" />
+            <End Role="course" EntitySet="course" />
           </AssociationSet>
           <AssociationSet Name="FK_DifficultyLevelPolicy_Session" Association="Self.FK_DifficultyLevelPolicy_Session">
             <End Role="sessions" EntitySet="sessions" />
@@ -796,6 +872,10 @@
             <End Role="Roles" EntitySet="Roles" />
             <End Role="Role_Assignment" EntitySet="Role_Assignment" />
           </AssociationSet>
+          <AssociationSet Name="FK_roleassignment_department" Association="Self.FK_roleassignment_department">
+            <End Role="departments" EntitySet="departments" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
           <AssociationSet Name="fk_section" Association="Self.fk_section">
             <End Role="section" EntitySet="section" />
             <End Role="Course_Assignment" EntitySet="Course_Assignment" />
@@ -819,6 +899,14 @@
           <AssociationSet Name="fk_session4" Association="Self.fk_session4">
             <End Role="sessions" EntitySet="sessions" />
             <End Role="submission_period" EntitySet="submission_period" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TeacherFreeSlots_Session" Association="Self.FK_TeacherFreeSlots_Session">
+            <End Role="sessions" EntitySet="sessions" />
+            <End Role="TeacherFreeSlots" EntitySet="TeacherFreeSlots" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TeacherFreeSlots_User" Association="Self.FK_TeacherFreeSlots_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="TeacherFreeSlots" EntitySet="TeacherFreeSlots" />
           </AssociationSet>
           <AssociationSet Name="FK_Topic_Session" Association="Self.FK_Topic_Session">
             <End Role="sessions" EntitySet="sessions" />
@@ -946,6 +1034,8 @@
           <NavigationProperty Name="Difficulty_level_policy" Relationship="Self.fk_course4" FromRole="course" ToRole="Difficulty_level_policy" />
           <NavigationProperty Name="paper_Assignment" Relationship="Self.fk_course5" FromRole="course" ToRole="paper_Assignment" />
           <NavigationProperty Name="papers" Relationship="Self.fk_course6" FromRole="course" ToRole="paper" />
+          <Property Name="department_id" Type="Int32" />
+          <NavigationProperty Name="department" Relationship="DirectorDashboardModel.FK_courses_departments" FromRole="course" ToRole="department" />
         </EntityType>
         <EntityType Name="Course_Assignment">
           <Key>
@@ -1073,6 +1163,8 @@
           <NavigationProperty Name="Role" Relationship="Self.fk_role" FromRole="Role_Assignment" ToRole="Roles" />
           <NavigationProperty Name="User" Relationship="Self.fk_user" FromRole="Role_Assignment" ToRole="Users" />
           <Property Name="IsTemporary" Type="Boolean" Nullable="false" />
+          <Property Name="department_id" Type="Int32" />
+          <NavigationProperty Name="department" Relationship="DirectorDashboardModel.FK_roleassignment_department" FromRole="Role_Assignment" ToRole="department" />
         </EntityType>
         <EntityType Name="Role">
           <Key>
@@ -1106,6 +1198,7 @@
           <NavigationProperty Name="cloes" Relationship="DirectorDashboardModel.FK_clos_session" FromRole="session" ToRole="clo" />
           <NavigationProperty Name="Difficulty_level_policy" Relationship="DirectorDashboardModel.FK_DifficultyLevelPolicy_Session" FromRole="session" ToRole="Difficulty_level_policy" />
           <NavigationProperty Name="topics" Relationship="DirectorDashboardModel.FK_Topic_Session" FromRole="session" ToRole="topic" />
+          <NavigationProperty Name="TeacherFreeSlots" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_Session" FromRole="session" ToRole="TeacherFreeSlot" />
         </EntityType>
         <EntityType Name="submission_period">
           <Key>
@@ -1162,6 +1255,7 @@
           <NavigationProperty Name="Vetting_Timming_Assignment" Relationship="Self.fk_user5" FromRole="Users" ToRole="Vetting_Timming_Assignment" />
           <Property Name="status" Type="Boolean" Nullable="false" />
           <Property Name="designation" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="TeacherFreeSlots" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_User" FromRole="User" ToRole="TeacherFreeSlot" />
         </EntityType>
         <EntityType Name="Vetting_Timming_Assignment">
           <Key>
@@ -1172,6 +1266,7 @@
           <Property Name="Vetting_Date" Type="DateTime" Precision="0" />
           <Property Name="Vetting_Time" Type="Time" Precision="7" />
           <NavigationProperty Name="User" Relationship="Self.fk_user5" FromRole="Vetting_Timming_Assignment" ToRole="Users" />
+          <Property Name="session_id" Type="Int32" />
         </EntityType>
         <Association Name="fk_paper">
           <End Role="paper" Type="Self.paper" Multiplicity="1" />
@@ -1720,6 +1815,24 @@
             <End Role="session" EntitySet="sessions" />
             <End Role="topic" EntitySet="topics" />
           </AssociationSet>
+          <EntitySet Name="departments" EntityType="DirectorDashboardModel.department" />
+          <AssociationSet Name="FK_courses_departments" Association="DirectorDashboardModel.FK_courses_departments">
+            <End Role="department" EntitySet="departments" />
+            <End Role="course" EntitySet="courses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_roleassignment_department" Association="DirectorDashboardModel.FK_roleassignment_department">
+            <End Role="department" EntitySet="departments" />
+            <End Role="Role_Assignment" EntitySet="Role_Assignment" />
+          </AssociationSet>
+          <EntitySet Name="TeacherFreeSlots" EntityType="DirectorDashboardModel.TeacherFreeSlot" />
+          <AssociationSet Name="FK_TeacherFreeSlots_Session" Association="DirectorDashboardModel.FK_TeacherFreeSlots_Session">
+            <End Role="session" EntitySet="sessions" />
+            <End Role="TeacherFreeSlot" EntitySet="TeacherFreeSlots" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TeacherFreeSlots_User" Association="DirectorDashboardModel.FK_TeacherFreeSlots_User">
+            <End Role="User" EntitySet="Users" />
+            <End Role="TeacherFreeSlot" EntitySet="TeacherFreeSlots" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_clos_session">
           <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="0..1" />
@@ -1805,6 +1918,77 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="department">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="courses" Relationship="DirectorDashboardModel.FK_courses_departments" FromRole="department" ToRole="course" />
+          <NavigationProperty Name="Role_Assignment" Relationship="DirectorDashboardModel.FK_roleassignment_department" FromRole="department" ToRole="Role_Assignment" />
+        </EntityType>
+        <Association Name="FK_courses_departments">
+          <End Type="DirectorDashboardModel.department" Role="department" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.course" Role="course" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="department">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_roleassignment_department">
+          <End Type="DirectorDashboardModel.department" Role="department" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Role_Assignment" Role="Role_Assignment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="department">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Role_Assignment">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TeacherFreeSlot">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="SessionId" Type="Int32" Nullable="false" />
+          <Property Name="Day" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="StartTime" Type="Time" />
+          <Property Name="EndTime" Type="Time" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_Session" FromRole="TeacherFreeSlot" ToRole="session" />
+          <NavigationProperty Name="User" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_User" FromRole="TeacherFreeSlot" ToRole="User" />
+        </EntityType>
+        <Association Name="FK_TeacherFreeSlots_Session">
+          <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.TeacherFreeSlot" Role="TeacherFreeSlot" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="session">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TeacherFreeSlot">
+              <PropertyRef Name="SessionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TeacherFreeSlots_User">
+          <End Type="DirectorDashboardModel.User" Role="User" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.TeacherFreeSlot" Role="TeacherFreeSlot" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="TeacherFreeSlot">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1868,6 +2052,7 @@
           <EntitySetMapping Name="courses">
             <EntityTypeMapping TypeName="DirectorDashboardModel.course">
               <MappingFragment StoreEntitySet="course">
+                <ScalarProperty Name="department_id" ColumnName="department_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="course_code" ColumnName="course_code" />
                 <ScalarProperty Name="title" ColumnName="title" />
@@ -1974,6 +2159,7 @@
           <EntitySetMapping Name="Role_Assignment">
             <EntityTypeMapping TypeName="DirectorDashboardModel.Role_Assignment">
               <MappingFragment StoreEntitySet="Role_Assignment">
+                <ScalarProperty Name="department_id" ColumnName="department_id" />
                 <ScalarProperty Name="IsTemporary" ColumnName="IsTemporary" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="user_id" ColumnName="user_id" />
@@ -2054,10 +2240,32 @@
           <EntitySetMapping Name="Vetting_Timming_Assignment">
             <EntityTypeMapping TypeName="DirectorDashboardModel.Vetting_Timming_Assignment">
               <MappingFragment StoreEntitySet="Vetting_Timming_Assignment">
+                <ScalarProperty Name="session_id" ColumnName="session_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="user_id" ColumnName="user_id" />
                 <ScalarProperty Name="Vetting_Date" ColumnName="Vetting_Date" />
                 <ScalarProperty Name="Vetting_Time" ColumnName="Vetting_Time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="departments">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.department">
+              <MappingFragment StoreEntitySet="departments">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TeacherFreeSlots">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.TeacherFreeSlot">
+              <MappingFragment StoreEntitySet="TeacherFreeSlots">
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="Day" ColumnName="Day" />
+                <ScalarProperty Name="SessionId" ColumnName="SessionId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

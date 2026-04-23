@@ -29,6 +29,7 @@ namespace fypProject.Controllers
 
 
 
+
         [HttpGet]
         [Route("api/clos/get_Clos/{courseId}")]
         public IHttpActionResult GetCLOs(int courseId)
@@ -239,6 +240,7 @@ namespace fypProject.Controllers
 
 
 
+
         [HttpGet]
         [Route("api/clos/get_ClosWithWeightage/{courseId}")]
         public IHttpActionResult ClosWithWeightage(int courseId)
@@ -363,14 +365,6 @@ namespace fypProject.Controllers
 
 
     }
-
-
-
-
-
-
-
-
 
 
 

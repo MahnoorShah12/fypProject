@@ -12,14 +12,17 @@ namespace fypProject.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Vetting_Timming_Assignment
+    public partial class TeacherFreeSlot
     {
-        public int id { get; set; }
-        public int user_id { get; set; }
-        public Nullable<System.DateTime> Vetting_Date { get; set; }
-        public Nullable<System.TimeSpan> Vetting_Time { get; set; }
-        public Nullable<int> session_id { get; set; }
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int SessionId { get; set; }
+        public string Day { get; set; }
+        public Nullable<System.TimeSpan> StartTime { get; set; }
+        public Nullable<System.TimeSpan> EndTime { get; set; }
+        public Nullable<System.DateTime> CreatedAt { get; set; }
     
+        public virtual session session { get; set; }
         public virtual User User { get; set; }
     }
 }

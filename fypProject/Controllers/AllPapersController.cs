@@ -23,7 +23,7 @@ namespace fypProject.Controllers
 
         [HttpGet]
         [Route("api/allPapers/get")]
-        public HttpResponseMessage GetAllPapers([FromUri] string status = null)
+        public HttpResponseMessage GetAllPapers()
         {
             try
             {
@@ -31,31 +31,84 @@ namespace fypProject.Controllers
                 if (activeSession == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "No active session found");
 
-                var query = db.papers.Where(p => p.session_id == activeSession.id);
-
-                
-                if (!string.IsNullOrEmpty(status))
-                {
-                    query = query.Where(p => p.status.ToLower() == status.ToLower());
-                }
-
-                
-                var papers = query
+                var papers = db.papers
+                    .Where(p => p.session_id == activeSession.id)
                     .Select(p => new
                     {
                         PaperId = p.id,
+                        CourseId = p.course.id,
                         CourseTitle = p.course.title,
-                        Status = p.status,
-                        Term = p.term
+                        CourseCode = p.course.course_code,
+                        Term = p.term,
+                        DbStatus = p.status,
+                        SessionId = p.session_id
                     })
                     .ToList();
 
-                return Request.CreateResponse(HttpStatusCode.OK, papers);
+                var mappedPapers = papers.Select(p => new
+                {
+                    p.PaperId,
+                    p.CourseTitle,
+                    p.CourseId,
+                    p.Term,
+                    p.CourseCode,
+                    Status = MapStatus(p.DbStatus),
+
+                    // 🔥 NEW: Get assigned teacher names if Pending
+                    AssignedTeachers = MapStatus(p.DbStatus) == "Pending"
+                        ? db.paper_Assignment
+                            .Where(pa =>
+                                pa.course_id == p.CourseId &&
+                                pa.session_id == p.SessionId)
+                            .Join(db.Users,
+                                pa => pa.user_id,
+                                u => u.id,
+                                (pa, u) => u.name)
+                            .Distinct()
+                            .ToList()
+                        : null
+                })
+                .ToList();
+
+                var counts = new
+                {
+                    All = mappedPapers.Count,
+                    Uploaded = mappedPapers.Count(x => x.Status == "Uploaded"),
+                    Pending = mappedPapers.Count(x => x.Status == "Pending"),
+                    Approved = mappedPapers.Count(x => x.Status == "Approved"),
+                    Printed = mappedPapers.Count(x => x.Status == "Printed")
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK, new
+                {
+                    Papers = mappedPapers,
+                    Counts = counts
+                });
             }
             catch (Exception ex)
             {
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        // 🔥 Status Mapping Function
+        private string MapStatus(string dbStatus)
+        {
+            if (dbStatus == "Submitted")
+                return "Uploaded";
+
+            if (dbStatus == "Approved")
+                return "Approved";
+
+            if (dbStatus == "Printed")
+                return "Printed";
+
+            if (dbStatus == "Creation" ||
+                dbStatus == "ReadyForFacultyApprover" ||
+                dbStatus == "WaitingForFacultyApprover")
+                return "Pending";
+
+            return "Pending";
         }
 
 
@@ -87,7 +140,7 @@ namespace fypProject.Controllers
         {
             try
             {
-                
+
                 var query = db.papers.Where(p => p.status == "printed");
 
                 if (sessionId.HasValue)
@@ -95,13 +148,13 @@ namespace fypProject.Controllers
                     query = query.Where(p => p.session_id == sessionId.Value);
                 }
 
-               
+
                 if (!string.IsNullOrEmpty(term))
                 {
                     query = query.Where(p => p.term.ToLower() == term.ToLower());
                 }
 
-         
+
                 var papers = query
                     .Select(p => new
                     {
@@ -114,7 +167,7 @@ namespace fypProject.Controllers
                     })
                     .ToList();
 
-               
+
                 var summary = new
                 {
                     MidCount = papers.Count(p => p.Term.ToLower() == "mid"),
