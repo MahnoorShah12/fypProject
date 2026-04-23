@@ -211,8 +211,8 @@
           <Property Name="UserId" Type="int" Nullable="false" />
           <Property Name="SessionId" Type="int" Nullable="false" />
           <Property Name="Day" Type="varchar" MaxLength="50" />
-          <Property Name="StartTime" Type="varchar" MaxLength="50" />
-          <Property Name="EndTime" Type="varchar" MaxLength="50" />
+          <Property Name="StartTime" Type="time" Precision="7" />
+          <Property Name="EndTime" Type="time" Precision="7" />
           <Property Name="CreatedAt" Type="datetime" />
         </EntityType>
         <EntityType Name="topic">
@@ -1959,8 +1959,8 @@
           <Property Name="UserId" Type="Int32" Nullable="false" />
           <Property Name="SessionId" Type="Int32" Nullable="false" />
           <Property Name="Day" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="StartTime" Type="Time" />
-          <Property Name="EndTime" Type="Time" />
+          <Property Name="StartTime" Type="Time" Precision="7" />
+          <Property Name="EndTime" Type="Time" Precision="7" />
           <Property Name="CreatedAt" Type="DateTime" Precision="3" />
           <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_Session" FromRole="TeacherFreeSlot" ToRole="session" />
           <NavigationProperty Name="User" Relationship="DirectorDashboardModel.FK_TeacherFreeSlots_User" FromRole="TeacherFreeSlot" ToRole="User" />
