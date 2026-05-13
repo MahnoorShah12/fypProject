@@ -18,6 +18,7 @@ namespace fypProject.Models
         public int NoOfQuestions { get; set; }
         public string DegreePrograms { get; set; }
         public string CourseCode { get; set; }
+        public string PaperSolution { get; set; }
         public string CourseTitle { get; set; }
         public string CourseCreditHours { get; set; }
         public int SessionId { get; set; }

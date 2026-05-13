@@ -49,5 +49,6 @@ namespace fypProject.Models
         public virtual DbSet<Vetting_Timming_Assignment> Vetting_Timming_Assignment { get; set; }
         public virtual DbSet<department> departments { get; set; }
         public virtual DbSet<TeacherFreeSlot> TeacherFreeSlots { get; set; }
+        public virtual DbSet<question_clo> question_clo { get; set; }
     }
 }

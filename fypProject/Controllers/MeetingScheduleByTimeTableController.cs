@@ -14,6 +14,40 @@ namespace fypProject.Controllers
     {
         private DirectorDashboardEntities db = new DirectorDashboardEntities();
 
+        //private bool TryParseTimeRange(string input, out string start, out string end)
+        //{
+        //    start = "";
+        //    end = "";
+
+        //    if (string.IsNullOrWhiteSpace(input))
+        //        return false;
+
+        //    var parts = input.Split('-');
+
+        //    if (parts.Length != 2)
+        //        return false;
+
+        //    start = parts[0].Trim();
+        //    end = parts[1].Trim();
+
+        //    return TimeSpan.TryParse(start, out _) && TimeSpan.TryParse(end, out _);
+        //}
+
+        private bool TryParseTimeRange(string input, out TimeSpan start, out TimeSpan end)
+        {
+            start = default;
+            end = default;
+
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            var parts = input.Split('-');
+            if (parts.Length != 2)
+                return false;
+
+            return TimeSpan.TryParse(parts[0].Trim(), out start) &&
+                   TimeSpan.TryParse(parts[1].Trim(), out end);
+        }
         // ✅ IMPORT EXCEL (Teacher Free Slots)
         [HttpPost]
         [Route("api/TeacherFreeSlots/import")]
@@ -21,6 +55,7 @@ namespace fypProject.Controllers
         {
             try
             {
+                // ================= SESSION =================
                 var session = sessionId.HasValue
                     ? db.sessions.FirstOrDefault(s => s.id == sessionId)
                     : db.sessions.FirstOrDefault(s => s.Active == true);
@@ -29,6 +64,8 @@ namespace fypProject.Controllers
                     return BadRequest("No valid or active session found");
 
                 int finalSessionId = session.id;
+
+                // ================= FILE CHECK =================
                 var httpRequest = HttpContext.Current.Request;
 
                 if (httpRequest.Files.Count == 0)
@@ -36,82 +73,141 @@ namespace fypProject.Controllers
 
                 var file = httpRequest.Files[0];
 
+                // ================= REPORTING LISTS =================
+                var missingTeachersInDB = new List<object>();
+                var invalidRows = new List<object>();
+                var duplicateSkipped = new List<object>();
+
+                // 🔥 FIX: prevent duplicate missing teacher reports
+                var missingTeacherSet = new HashSet<string>();
+
+                var freeSlots = new List<TeacherFreeSlot>();
+                int successRows = 0;
+
+                string lastTeacherName = "";
+                int rowIndex = 1;
+
                 using (var workbook = new XLWorkbook(file.InputStream))
                 {
                     var worksheet = workbook.Worksheet(1);
-                    var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
 
-                    var freeSlots = new List<TeacherFreeSlot>();
-
-                    string lastTeacherName = ""; // Keep track of the last non-empty teacher
+                    var rows = worksheet.RangeUsed()?.RowsUsed().Skip(1);
+                    if (rows == null)
+                        return BadRequest("Excel file is empty or invalid format");
 
                     foreach (var row in rows)
                     {
-                        string teacherName = row.Cell(1).GetString().Trim();
+                        rowIndex++;
 
-                        // If empty, use the last teacher
-                        if (string.IsNullOrEmpty(teacherName))
-                            teacherName = lastTeacherName;
-                        else
-                            lastTeacherName = teacherName;
-
-                        string timeRange = row.Cell(2).GetString().Trim();
-
-                        // Skip invalid time
-                        if (string.IsNullOrEmpty(timeRange) || !timeRange.Contains("-"))
-                            continue;
-
-                        var parts = timeRange.Split('-');
-                        if (parts.Length != 2)
-                            continue;
-
-                        string startTime = parts[0].Trim();
-                        string endTime = parts[1].Trim();
-
-                        var user = db.Users.FirstOrDefault(u => u.name == teacherName);
-                        if (user == null)
-                            continue;
-
-                        // Loop through Mon-Fri (columns 3-7)
-                        for (int col = 3; col <= 7; col++)
+                        try
                         {
-                            string cellValue = row.Cell(col).GetString().Trim();
+                            // ================= TEACHER NAME =================
+                            string teacherName = row.Cell(1).GetString().Trim();
 
-                            // ✅ Treat empty or "-" as free slot
-                            if (!string.IsNullOrEmpty(cellValue) && cellValue != "-")
-                                continue; // busy
+                            if (string.IsNullOrWhiteSpace(teacherName))
+                                teacherName = lastTeacherName;
+                            else
+                                lastTeacherName = teacherName;
 
-                            string day = "";
-                            switch (col)
+                            // ================= TIME RANGE =================
+                            string timeRange = row.Cell(2).GetString().Trim();
+
+                            if (!TryParseTimeRange(timeRange, out TimeSpan startTime, out TimeSpan endTime))
                             {
-                                case 3: day = "Mon"; break;
-                                case 4: day = "Tue"; break;
-                                case 5: day = "Wed"; break;
-                                case 6: day = "Thu"; break;
-                                case 7: day = "Fri"; break;
+                                invalidRows.Add(new
+                                {
+                                    row = rowIndex,
+                                    teacher = teacherName,
+                                    error = "Invalid time format (expected HH:mm-HH:mm)",
+                                    value = timeRange
+                                });
+                                continue;
                             }
 
-                            // Avoid duplicates
-                            bool exists = db.TeacherFreeSlots.Any(x =>
-                                x.UserId == user.id &&
-                                x.Day == day &&
-                                x.StartTime.ToString() == startTime &&
-                                x.EndTime.ToString() == endTime &&
-                                x.SessionId == finalSessionId
-                            );
+                            // ================= USER CHECK =================
+                            var user = db.Users.FirstOrDefault(u => u.name == teacherName);
 
-                            if (!exists)
+                            if (user == null)
                             {
+                                // 🔥 ADD ONLY ONCE PER TEACHER
+                                if (!missingTeacherSet.Contains(teacherName))
+                                {
+                                    missingTeacherSet.Add(teacherName);
+
+                                    missingTeachersInDB.Add(new
+                                    {
+                                        teacherName,
+                                        issue = "Teacher exists in timetable but NOT in Users table",
+                                        action = "Fix name or add teacher in Users table"
+                                    });
+                                }
+
+                                continue;
+                            }
+
+                            // ================= DAYS LOOP =================
+                            for (int col = 3; col <= 7; col++)
+                            {
+                                string cellValue = row.Cell(col).GetString().Trim();
+
+                                // skip busy slot
+                                if (!string.IsNullOrWhiteSpace(cellValue) && cellValue != "-")
+                                    continue;
+
+                                string day = "";
+
+                                switch (col)
+                                {
+                                    case 3: day = "Mon"; break;
+                                    case 4: day = "Tue"; break;
+                                    case 5: day = "Wed"; break;
+                                    case 6: day = "Thu"; break;
+                                    case 7: day = "Fri"; break;
+                                    default: day = ""; break;
+                                }
+
+                                if (string.IsNullOrEmpty(day))
+                                    continue;
+
+                                bool exists = db.TeacherFreeSlots.Any(x =>
+                                    x.UserId == user.id &&
+                                    x.Day == day &&
+                                    x.StartTime == startTime &&
+                                    x.EndTime == endTime &&
+                                    x.SessionId == finalSessionId
+                                );
+
+                                if (exists)
+                                {
+                                    duplicateSkipped.Add(new
+                                    {
+                                        teacher = teacherName,
+                                        day,
+                                        time = $"{startTime}-{endTime}"
+                                    });
+                                    continue;
+                                }
+
                                 freeSlots.Add(new TeacherFreeSlot
                                 {
                                     UserId = user.id,
                                     SessionId = finalSessionId,
                                     Day = day,
-                                    StartTime = TimeSpan.Parse(startTime),   // ✅ FIX
-                                    EndTime = TimeSpan.Parse(endTime),
+                                    StartTime = startTime,
+                                    EndTime = endTime,
                                     CreatedAt = DateTime.Now
                                 });
+
+                                successRows++;
                             }
+                        }
+                        catch (Exception exRow)
+                        {
+                            invalidRows.Add(new
+                            {
+                                row = rowIndex,
+                                error = exRow.Message
+                            });
                         }
                     }
 
@@ -121,15 +217,28 @@ namespace fypProject.Controllers
                     db.SaveChanges();
                 }
 
+                // ================= RESPONSE =================
                 return Ok(new
                 {
-                    message = "Teacher free slots imported successfully ",
-                    sessionUsed = finalSessionId
+                    message = "Import completed successfully with full validation report",
+                    sessionUsed = finalSessionId,
+
+                    summary = new
+                    {
+                        successRows,
+                        missingTeachers = missingTeacherSet.Count,
+                        invalidRows = invalidRows.Count,
+                        duplicateSkipped = duplicateSkipped.Count
+                    },
+
+                    missingTeachersInDB,
+                    invalidRows,
+                    duplicateSkipped
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("System Error: " + ex.Message);
             }
         }
         // ✅ GET ALL SLOTS
@@ -164,7 +273,6 @@ namespace fypProject.Controllers
 
 
 
-
         [HttpPost]
         [Route("api/Meetings/GenerateSchedule")]
         public IHttpActionResult GenerateOptimizedSchedule(MeetingRequest request)
@@ -183,26 +291,25 @@ namespace fypProject.Controllers
 
                 var allMeetings = new List<GeneratedMeeting>();
 
-                // Get all teachers in alphabetical order
-                var teachers = db.Users.OrderBy(u => u.name).ToList();
+                // ✅ NEW: Track issues
+                var teacherIssues = new List<object>();
 
-                // Pull all teacher slots into memory
+                var teachers = db.Users.OrderBy(u => u.name).ToList();
                 var allSlots = db.TeacherFreeSlots.ToList();
 
-                // Build a map: teacherId => list of free slots
                 var teacherFreeSlots = new Dictionary<int, List<TeacherFreeSlot>>();
                 foreach (var teacher in teachers)
                 {
                     teacherFreeSlots[teacher.id] = allSlots
                         .Where(s => s.UserId == teacher.id)
-                            .OrderBy(s => s.StartTime)
-                        .ToList();
+.OrderBy(s => s.StartTime ?? TimeSpan.MaxValue)
+    .ToList();
                 }
 
                 var currentDate = startDate;
-                // ✅ Get session id
+
                 var session = db.sessions.FirstOrDefault(s => s.Active);
-                // ✅ Get teacher courses (papers)
+
                 var teacherCoursesMap = (
                     from pa in db.paper_Assignment
                     join c in db.courses on pa.course_id equals c.id
@@ -219,25 +326,80 @@ namespace fypProject.Controllers
                     g => g.Key,
                     g => g.Select(x => x.CourseName).Distinct().OrderBy(x => x).ToList()
                 );
-                // Queue of unscheduled teachers
+
                 var unscheduledTeachers = new Queue<int>(
-      teachers
-          .Where(t => teacherCoursesMap.ContainsKey(t.id)
-                      && teacherCoursesMap[t.id] != null
-                      && teacherCoursesMap[t.id].Any())
-          .Select(t => t.id)
-  );
+                    teachers
+                        .Where(t => teacherCoursesMap.ContainsKey(t.id)
+                                    && teacherCoursesMap[t.id] != null
+                                    && teacherCoursesMap[t.id].Any())
+                        .Select(t => t.id)
+                );
+
                 while (unscheduledTeachers.Count > 0 && currentDate <= endDate)
                 {
                     string day = currentDate.DayOfWeek.ToString().Substring(0, 3);
 
                     int totalTeachersToday = unscheduledTeachers.Count;
+
                     for (int i = 0; i < totalTeachersToday; i++)
                     {
                         int teacherId = unscheduledTeachers.Dequeue();
-                        var freeSlots = teacherFreeSlots[teacherId]
-                            .Where(s => s.Day == day)
-                            .ToList(); // safe to parse now
+
+                        // ✅ Check teacher exists
+                        var teacher = db.Users.FirstOrDefault(u => u.id == teacherId);
+                        if (teacher == null)
+                        {
+                            teacherIssues.Add(new
+                            {
+                                TeacherId = teacherId,
+                                Issue = "Teacher not found"
+                            });
+                            continue;
+                        }
+
+                        // ✅ Check courses
+                        if (!teacherCoursesMap.ContainsKey(teacherId) || !teacherCoursesMap[teacherId].Any())
+                        {
+                            teacherIssues.Add(new
+                            {
+                                TeacherId = teacherId,
+                                TeacherName = teacher.name,
+                                Issue = "No papers assigned"
+                            });
+
+                            db.Alerts.Add(new Alert
+                            {
+                                sender_id = request.senderId,
+                                reciever_id = teacher.id,
+                                description = "No papers assigned for scheduling"
+                            });
+
+                            continue;
+                        }
+
+                        // ✅ Safe free slot fetch
+                        var freeSlots = teacherFreeSlots.ContainsKey(teacherId)
+                            ? teacherFreeSlots[teacherId].Where(s => s.Day == day).ToList()
+                            : new List<TeacherFreeSlot>();
+
+                        if (!freeSlots.Any())
+                        {
+                            teacherIssues.Add(new
+                            {
+                                TeacherId = teacherId,
+                                TeacherName = teacher.name,
+                                Issue = "No timetable / free slots available"
+                            });
+
+                            db.Alerts.Add(new Alert
+                            {
+                                sender_id = request.senderId,
+                                reciever_id = teacher.id,
+                                description = "No timetable available for scheduling"
+                            });
+
+                            continue;
+                        }
 
                         bool scheduled = false;
 
@@ -251,19 +413,15 @@ namespace fypProject.Controllers
 
                             if (meetingStart + TimeSpan.FromMinutes(slotDuration) <= meetingEnd)
                             {
-                                // Check for conflicts
                                 bool conflict = allMeetings.Any(m =>
                                     m.Date == currentDate &&
                                     m.StartTime == meetingStart.ToString(@"hh\:mm"));
 
                                 if (!conflict)
                                 {
-                                    var teacher = db.Users.First(u => u.id == teacherId);
-
                                     var meetingStartStr = meetingStart.ToString(@"hh\:mm");
                                     var meetingEndStr = (meetingStart + TimeSpan.FromMinutes(slotDuration)).ToString(@"hh\:mm");
 
-                                    // ✅ Get courses for this teacher
                                     var courses = teacherCoursesMap.ContainsKey(teacherId)
                                         ? teacherCoursesMap[teacherId]
                                         : new List<string>();
@@ -275,11 +433,9 @@ namespace fypProject.Controllers
                                         Date = currentDate,
                                         StartTime = meetingStartStr,
                                         EndTime = meetingEndStr,
-
-                                        // ✅ NEW FIELD
                                         Courses = courses
                                     });
-                                    // ✅ ADD ALERT HERE
+
                                     db.Alerts.Add(new Alert
                                     {
                                         sender_id = request.senderId,
@@ -288,13 +444,30 @@ namespace fypProject.Controllers
                                     });
 
                                     scheduled = true;
-                                    break; // Only one meeting per teacher per day
+                                    break;
                                 }
                             }
                         }
 
+                        // ✅ If not scheduled
                         if (!scheduled)
-                            unscheduledTeachers.Enqueue(teacherId); // try next day
+                        {
+                            teacherIssues.Add(new
+                            {
+                                TeacherId = teacherId,
+                                TeacherName = teacher.name,
+                                Issue = "Could not schedule due to time conflict or slot limitation"
+                            });
+
+                            db.Alerts.Add(new Alert
+                            {
+                                sender_id = request.senderId,
+                                reciever_id = teacher.id,
+                                description = "Could not schedule meeting due to time conflict"
+                            });
+
+                            unscheduledTeachers.Enqueue(teacherId);
+                        }
                     }
 
                     currentDate = currentDate.AddDays(1);
@@ -305,7 +478,8 @@ namespace fypProject.Controllers
                 return Ok(new
                 {
                     message = "Optimized schedule generated",
-                    Meetings = allMeetings
+                    Meetings = allMeetings,
+                    Issues = teacherIssues // ✅ NEW RESPONSE
                 });
             }
             catch (Exception ex)
@@ -313,7 +487,6 @@ namespace fypProject.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
 
 

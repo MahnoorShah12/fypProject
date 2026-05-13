@@ -16,15 +16,20 @@ namespace fypProject.Models
     {
         public int id { get; set; }
         public string text { get; set; }
-        public string description { get; set; }
         public string image { get; set; }
         public string difficulty_level { get; set; }
         public Nullable<int> clo_id { get; set; }
         public Nullable<int> marks { get; set; }
-        public int paper_id { get; set; }
+        public Nullable<int> paper_id { get; set; }
         public Nullable<bool> isextra { get; set; }
         public Nullable<int> editor_id { get; set; }
+        public Nullable<int> question_id { get; set; }
+        public Nullable<int> topic_id { get; set; }
     
         public virtual User User { get; set; }
+        public virtual Question Question { get; set; }
+        public virtual clo clo { get; set; }
+        public virtual paper paper { get; set; }
+        public virtual topic topic { get; set; }
     }
 }

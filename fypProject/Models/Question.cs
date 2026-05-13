@@ -19,6 +19,8 @@ namespace fypProject.Models
         {
             this.Comment_Paper_Question = new HashSet<Comment_Paper_Question>();
             this.Question_Accept_Reject = new HashSet<Question_Accept_Reject>();
+            this.Question_edited = new HashSet<Question_edited>();
+            this.question_clo = new HashSet<question_clo>();
         }
     
         public int id { get; set; }
@@ -32,6 +34,7 @@ namespace fypProject.Models
         public Nullable<bool> isextra { get; set; }
         public Nullable<int> editor_id { get; set; }
         public Nullable<int> version { get; set; }
+        public Nullable<int> topic_id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment_Paper_Question> Comment_Paper_Question { get; set; }
@@ -42,5 +45,10 @@ namespace fypProject.Models
         public virtual paper paper { get; set; }
         public virtual paper paper1 { get; set; }
         public virtual paper paper2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Question_edited> Question_edited { get; set; }
+        public virtual topic topic { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<question_clo> question_clo { get; set; }
     }
 }

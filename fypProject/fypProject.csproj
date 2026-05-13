@@ -244,6 +244,7 @@
     <Compile Include="Controllers\MeetingScheduleByTimeTableController.cs" />
     <Compile Include="Controllers\NotificationController.cs" />
     <Compile Include="Controllers\PaperController.cs" />
+    <Compile Include="Controllers\PaperVerificationController.cs" />
     <Compile Include="Controllers\policyController.cs" />
     <Compile Include="Controllers\SectionController.cs" />
     <Compile Include="Controllers\SessionController.cs" />
@@ -287,6 +288,7 @@
     <Compile Include="Models\Difficulty_level_policy.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Director_Question_Accept_RejectDTO.cs" />
     <Compile Include="Models\EmailDTO.cs" />
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\Model1.Context.cs">
@@ -316,6 +318,9 @@
     </Compile>
     <Compile Include="Models\QuestionApproveRequestDto.cs" />
     <Compile Include="Models\Question_Accept_Reject.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\question_clo.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Question_edited.cs">

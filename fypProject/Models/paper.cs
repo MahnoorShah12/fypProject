@@ -22,6 +22,7 @@ namespace fypProject.Models
             this.Questions = new HashSet<Question>();
             this.Questions1 = new HashSet<Question>();
             this.Questions2 = new HashSet<Question>();
+            this.Question_edited = new HashSet<Question_edited>();
         }
     
         public int id { get; set; }
@@ -37,6 +38,8 @@ namespace fypProject.Models
         public string term { get; set; }
         public Nullable<int> no_of_questions { get; set; }
         public string status { get; set; }
+        public string paper_solution { get; set; }
+        public string type { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Alert> Alerts { get; set; }
@@ -50,5 +53,7 @@ namespace fypProject.Models
         public virtual ICollection<Question> Questions1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Question> Questions2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Question_edited> Question_edited { get; set; }
     }
 }

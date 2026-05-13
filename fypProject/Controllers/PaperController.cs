@@ -22,21 +22,28 @@ namespace fypProject.Controllers
 
 
 
+
+
+
+
+
+
+
         [HttpGet]
         [Route("api/paper/Get_Teacher_Courses/{teacherId}")]
         public IHttpActionResult GetTeacherCourses(int teacherId, int? sessionId = null)
         {
-            // 1️⃣ Get session (requested OR active)
+            // 1️⃣ Get session
             var session = sessionId.HasValue
-       ? db.sessions.FirstOrDefault(s => s.id == sessionId.Value)
-       : db.sessions.FirstOrDefault(s => s.Active);
+                ? db.sessions.FirstOrDefault(s => s.id == sessionId.Value)
+                : db.sessions.FirstOrDefault(s => s.Active);
 
             if (session == null)
                 return BadRequest("No valid session found");
 
+            // 2️⃣ Get courses with paper info
             var courses = db.Course_Assignment
-                .Where(ca => ca.user_id == teacherId &&
-                    (ca.session_id == session.id)) // remove '|| ca.session_id == null' if session_id is int
+                .Where(ca => ca.user_id == teacherId && ca.session_id == session.id)
                 .Join(db.courses,
                       ca => ca.course_id,
                       c => c.id,
@@ -44,16 +51,36 @@ namespace fypProject.Controllers
                       {
                           CourseId = c.id,
                           CourseTitle = c.title,
-                          SessionId = session.id
+                          CourseCode = c.course_code,
+                          SessionId = session.id,
+
+                          // ✅ Check if teacher created paper
+                          CreatePaper = db.paper_Assignment.Any(p =>
+                              p.user_id == teacherId &&
+                              p.course_id == c.id &&
+                              p.session_id == session.id
+                          ),
+
+
                       })
+                .ToList()
+                .Select(c => new
+                {
+                    c.CourseId,
+                    c.CourseTitle,
+                    c.CourseCode,
+                    c.SessionId,
+                    c.CreatePaper,
+
+                    // ✅ If paper exists but not created by this teacher → view only
+                    ViewOnly = c.CreatePaper
+                })
                 .Distinct()
                 .ToList();
-
 
             if (!courses.Any())
                 return BadRequest("No courses found for this teacher in this session");
 
-            // 3️⃣ Return result
             return Ok(new
             {
                 Message = "Teacher courses fetched successfully",
@@ -61,7 +88,6 @@ namespace fypProject.Controllers
                 Courses = courses
             });
         }
-
 
 
 
@@ -108,7 +134,8 @@ namespace fypProject.Controllers
                           CourseId = c.id,
                           CourseTitle = c.title,
                           CourseCode = c.course_code,
-                          SessionId = session.id
+                          SessionId = session.id,
+                          CreditHours = c.credit_hours
                       })
                 .FirstOrDefault();
 
@@ -182,6 +209,171 @@ namespace fypProject.Controllers
 
 
 
+
+
+
+
+        //[HttpPost]
+        //[Route("api/paper/CreateOrUpdate")]
+        //public HttpResponseMessage CreateOrUpdate([FromBody] paper request)
+        //{
+        //    try
+        //    {
+        //        if (request == null)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid request data");
+
+        //        // ------------------------------
+        //        // Normalize term
+        //        // ------------------------------
+        //        if (string.IsNullOrWhiteSpace(request.term))
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Term is required");
+
+        //        request.term = request.term.ToLower();
+        //        if (request.term != "mid" && request.term != "final")
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Term must be 'mid' or 'final'");
+
+        //        // ------------------------------
+        //        // Get Session (Requested OR Active)
+        //        // ------------------------------
+        //        var session = request.session_id != 0
+        //            ? db.sessions.FirstOrDefault(s => s.id == request.session_id)
+        //            : db.sessions.FirstOrDefault(s => s.Active);
+
+        //        if (session == null)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "No active session found");
+
+        //        request.session_id = session.id;
+
+        //        // ------------------------------
+        //        // Validate course and numeric fields
+        //        // ------------------------------
+        //        if (!db.courses.Any(c => c.id == request.course_id))
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid course ID");
+
+        //        if (request.total_marks < 0 || request.duration < 0 || (request.no_of_questions ?? 0) < 0)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Numeric fields cannot be negative");
+
+        //        // ------------------------------
+        //        // Check existing paper
+        //        // ------------------------------
+        //        var existingPaper = db.papers.FirstOrDefault(p =>
+        //            p.session_id == session.id &&
+        //            p.course_id == request.course_id &&
+        //            p.term.ToLower() == request.term
+        //        );
+
+        //        int mainCount = request.no_of_questions ?? 0;
+
+        //        if (existingPaper != null)
+        //        {
+        //            // ------------------------------
+        //            // Update existing paper
+        //            // ------------------------------
+        //            existingPaper.paper_Date = request.paper_Date;
+        //            existingPaper.Start_time = request.Start_time;
+        //            existingPaper.end_time = request.end_time;
+        //            existingPaper.duration = request.duration;
+        //            existingPaper.degree_programs = request.degree_programs;
+        //            existingPaper.total_marks = request.total_marks;
+        //            existingPaper.teacher_name = request.teacher_name;
+        //            existingPaper.no_of_questions = mainCount;
+
+        //            db.SaveChanges();
+
+        //            // ------------------------------
+        //            // Handle main and extra questions
+        //            // ------------------------------
+        //            var allQuestions = db.Questions
+        //                .Where(q => q.paper_id == existingPaper.id)
+        //                .OrderBy(q => q.id)
+        //                .ToList();
+
+        //            var mainQuestions = allQuestions.Where(q => q.isextra == false).ToList();
+        //            var extraQuestions = allQuestions.Where(q => q.isextra == true).ToList();
+
+        //            // Increase main questions if needed
+        //            if (mainCount > mainQuestions.Count)
+        //            {
+        //                int toAdd = mainCount - mainQuestions.Count;
+        //                for (int i = 0; i < toAdd; i++)
+        //                {
+        //                    db.Questions.Add(new Question
+        //                    {
+        //                        paper_id = existingPaper.id,
+        //                        text = "",
+        //                        marks = 0,
+        //                        difficulty_level = "medium",
+        //                        isextra = false
+        //                    });
+        //                }
+        //            }
+        //            // Decrease main questions if needed → convert last main to extra
+        //            else if (mainCount < mainQuestions.Count)
+        //            {
+        //                // Keep the first 'mainCount' main questions
+        //                var questionsToKeepMain = mainQuestions
+        //                    .OrderBy(q => q.id)
+        //                    .Take(mainCount)
+        //                    .ToList();
+
+        //                // All others (including existing main beyond the first 'mainCount' and any existing extra) become extra
+        //                foreach (var q in allQuestions)
+        //                {
+        //                    if (!questionsToKeepMain.Contains(q))
+        //                        q.isextra = true;
+        //                    else
+        //                        q.isextra = false; // ensure the first 'mainCount' remain main
+        //                }
+        //            }
+
+        //            db.SaveChanges();
+
+        //            return Request.CreateResponse(HttpStatusCode.OK, new
+        //            {
+        //                message = "Paper updated successfully",
+        //                PaperId = existingPaper.id,
+        //                paperExists = true
+        //            });
+        //        }
+
+        //        // ------------------------------
+        //        // Create new paper
+        //        // ------------------------------
+        //        request.status = "creation";
+        //        var newPaper = db.papers.Add(request);
+        //        db.SaveChanges();
+
+        //        // ------------------------------
+        //        // Automatically create main questions
+        //        // ------------------------------
+        //        for (int i = 0; i < mainCount; i++)
+        //        {
+        //            db.Questions.Add(new Question
+        //            {
+        //                paper_id = newPaper.id,
+        //                text = "",
+        //                marks = 0,
+        //                difficulty_level = "medium",
+        //                isextra = false
+        //            });
+        //        }
+
+        //        db.SaveChanges();
+
+        //        return Request.CreateResponse(HttpStatusCode.OK, new
+        //        {
+        //            message = "Paper created successfully",
+        //            PaperId = newPaper.id,
+        //            paperExists = false
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+        //}
+
+
         [HttpPost]
         [Route("api/paper/CreateOrUpdate")]
         public HttpResponseMessage CreateOrUpdate([FromBody] paper request)
@@ -191,19 +383,30 @@ namespace fypProject.Controllers
                 if (request == null)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid request data");
 
-                // ------------------------------
-                // Normalize term
-                // ------------------------------
+                // =========================
+                // TERM
+                // =========================
                 if (string.IsNullOrWhiteSpace(request.term))
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Term is required");
 
-                request.term = request.term.ToLower();
-                if (request.term != "mid" && request.term != "final")
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Term must be 'mid' or 'final'");
+                request.term = request.term.ToLower().Trim();
 
-                // ------------------------------
-                // Get Session (Requested OR Active)
-                // ------------------------------
+                if (request.term != "mid" && request.term != "final")
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Term must be mid or final");
+
+                // =========================
+                // TYPE
+                // =========================
+                request.type = string.IsNullOrWhiteSpace(request.type)
+                    ? "theory"
+                    : request.type.ToLower().Trim();
+
+                if (request.type != "theory" && request.type != "lab")
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Type must be theory or lab");
+
+                // =========================
+                // SESSION
+                // =========================
                 var session = request.session_id != 0
                     ? db.sessions.FirstOrDefault(s => s.id == request.session_id)
                     : db.sessions.FirstOrDefault(s => s.Active);
@@ -213,31 +416,36 @@ namespace fypProject.Controllers
 
                 request.session_id = session.id;
 
-                // ------------------------------
-                // Validate course and numeric fields
-                // ------------------------------
+                // =========================
+                // COURSE CHECK
+                // =========================
                 if (!db.courses.Any(c => c.id == request.course_id))
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid course ID");
 
-                if (request.total_marks < 0 || request.duration < 0 || (request.no_of_questions ?? 0) < 0)
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Numeric fields cannot be negative");
-
-                // ------------------------------
-                // Check existing paper
-                // ------------------------------
-                var existingPaper = db.papers.FirstOrDefault(p =>
-                    p.session_id == session.id &&
-                    p.course_id == request.course_id &&
-                    p.term.ToLower() == request.term
-                );
-
                 int mainCount = request.no_of_questions ?? 0;
 
+                if ((request.total_marks ?? 0) < 0 ||
+                    (request.duration ?? 0) < 0 ||
+                    mainCount < 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Numeric fields cannot be negative");
+                }
+
+                // =========================
+                // FIND EXISTING PAPER (STRICT UNIQUE RULE)
+                // =========================
+                var existingPaper = db.papers.FirstOrDefault(p =>
+                    p.session_id == request.session_id &&
+                    p.course_id == request.course_id &&
+                    (p.term ?? "").ToLower() == request.term &&
+                    (p.type ?? "theory").ToLower() == request.type
+                );
+
+                // =========================
+                // UPDATE
+                // =========================
                 if (existingPaper != null)
                 {
-                    // ------------------------------
-                    // Update existing paper
-                    // ------------------------------
                     existingPaper.paper_Date = request.paper_Date;
                     existingPaper.Start_time = request.Start_time;
                     existingPaper.end_time = request.end_time;
@@ -246,25 +454,23 @@ namespace fypProject.Controllers
                     existingPaper.total_marks = request.total_marks;
                     existingPaper.teacher_name = request.teacher_name;
                     existingPaper.no_of_questions = mainCount;
+                    existingPaper.term = request.term;
+                    existingPaper.type = request.type;
 
                     db.SaveChanges();
 
-                    // ------------------------------
-                    // Handle main and extra questions
-                    // ------------------------------
-                    var allQuestions = db.Questions
+                    var questions = db.Questions
                         .Where(q => q.paper_id == existingPaper.id)
                         .OrderBy(q => q.id)
                         .ToList();
 
-                    var mainQuestions = allQuestions.Where(q => q.isextra == false).ToList();
-                    var extraQuestions = allQuestions.Where(q => q.isextra == true).ToList();
+                    var mainQuestions = questions.Where(q => q.isextra == false).ToList();
 
-                    // Increase main questions if needed
                     if (mainCount > mainQuestions.Count)
                     {
-                        int toAdd = mainCount - mainQuestions.Count;
-                        for (int i = 0; i < toAdd; i++)
+                        int add = mainCount - mainQuestions.Count;
+
+                        for (int i = 0; i < add; i++)
                         {
                             db.Questions.Add(new Question
                             {
@@ -276,23 +482,12 @@ namespace fypProject.Controllers
                             });
                         }
                     }
-                    // Decrease main questions if needed → convert last main to extra
                     else if (mainCount < mainQuestions.Count)
                     {
-                        // Keep the first 'mainCount' main questions
-                        var questionsToKeepMain = mainQuestions
-                            .OrderBy(q => q.id)
-                            .Take(mainCount)
-                            .ToList();
+                        var keep = mainQuestions.Take(mainCount).ToList();
 
-                        // All others (including existing main beyond the first 'mainCount' and any existing extra) become extra
-                        foreach (var q in allQuestions)
-                        {
-                            if (!questionsToKeepMain.Contains(q))
-                                q.isextra = true;
-                            else
-                                q.isextra = false; // ensure the first 'mainCount' remain main
-                        }
+                        foreach (var q in questions)
+                            q.isextra = !keep.Contains(q);
                     }
 
                     db.SaveChanges();
@@ -301,20 +496,51 @@ namespace fypProject.Controllers
                     {
                         message = "Paper updated successfully",
                         PaperId = existingPaper.id,
+                        type = existingPaper.type,
+                        term = existingPaper.term,
                         paperExists = true
                     });
                 }
 
-                // ------------------------------
-                // Create new paper
-                // ------------------------------
-                request.status = "creation";
-                var newPaper = db.papers.Add(request);
+                // =========================
+                // CREATE (SAFE CHECK BEFORE INSERT)
+                // =========================
+
+                var duplicateCheck = db.papers.Any(p =>
+                    p.session_id == request.session_id &&
+                    p.course_id == request.course_id &&
+                    p.term.ToLower() == request.term &&
+                    p.type.ToLower() == request.type
+                );
+
+                if (duplicateCheck)
+                {
+                    return Request.CreateResponse(HttpStatusCode.Conflict, new
+                    {
+                        message = "Paper already exists for this session, course, term and type"
+                    });
+                }
+
+                var newPaper = new paper
+                {
+                    course_id = request.course_id,
+                    session_id = request.session_id,
+                    term = request.term,
+                    type = request.type,
+                    paper_Date = request.paper_Date,
+                    Start_time = request.Start_time,
+                    end_time = request.end_time,
+                    duration = request.duration,
+                    degree_programs = request.degree_programs,
+                    total_marks = request.total_marks,
+                    teacher_name = request.teacher_name,
+                    no_of_questions = mainCount,
+                    status = "creation"
+                };
+
+                db.papers.Add(newPaper);
                 db.SaveChanges();
 
-                // ------------------------------
-                // Automatically create main questions
-                // ------------------------------
                 for (int i = 0; i < mainCount; i++)
                 {
                     db.Questions.Add(new Question
@@ -333,14 +559,21 @@ namespace fypProject.Controllers
                 {
                     message = "Paper created successfully",
                     PaperId = newPaper.id,
+                    type = newPaper.type,
+                    term = newPaper.term,
                     paperExists = false
                 });
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
+
         [HttpPost]
         [Route("api/question/Create")]
         public HttpResponseMessage Create()
@@ -455,34 +688,161 @@ namespace fypProject.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+        //[HttpPost]
+        //[Route("api/question/Edit/{id}")]
+        //public HttpResponseMessage Edit(int id)
+        //{
+        //    try
+        //    {
+        //        var httpRequest = HttpContext.Current.Request;
+
+        //        // ------------------------------
+        //        // Get existing question
+        //        // ------------------------------
+        //        var question = db.Questions.FirstOrDefault(q => q.id == id);
+        //        if (question == null)
+        //            return Request.CreateResponse(HttpStatusCode.NotFound, "Question not found");
+
+        //        // ------------------------------
+        //        // Read JSON string
+        //        // ------------------------------
+        //        var jsonData = httpRequest.Form["question"];
+        //        if (string.IsNullOrEmpty(jsonData))
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Question data is required");
+
+        //        var request = JsonConvert.DeserializeObject<Question>(jsonData);
+        //        if (request == null)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid JSON");
+
+        //        // ------------------------------
+        //        // Validate paper, marks, difficulty, CLO
+        //        // ------------------------------
+        //        var paper = db.papers.FirstOrDefault(p => p.id == question.paper_id);
+        //        if (paper == null)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Paper of this question not found");
+
+        //        if (request.marks < 0)
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Marks cannot be negative");
+
+        //        var validLevels = new[] { "easy", "medium", "tough" };
+        //        request.difficulty_level = string.IsNullOrEmpty(request.difficulty_level)
+        //            ? "medium"
+        //            : request.difficulty_level.ToLower();
+
+        //        if (!validLevels.Contains(request.difficulty_level))
+        //            return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid difficulty level");
+
+        //        if (request.clo_id != null)
+        //        {
+        //            bool cloExists = db.cloes.Any(c => c.id == request.clo_id && c.course_id == paper.course_id);
+        //            if (!cloExists)
+        //                return Request.CreateResponse(HttpStatusCode.BadRequest,
+        //                    "Invalid CLO ID or CLO does not belong to the same course as the paper");
+        //        }
+
+        //        // ------------------------------
+        //        // Check Director Flag
+        //        // ------------------------------
+        //        var isDirectorFlag = httpRequest.Form["isDirector"];
+        //        bool isDirector = !string.IsNullOrEmpty(isDirectorFlag) && isDirectorFlag.ToLower() == "true";
+
+        //        // ------------------------------
+        //        // Director vs Normal Logic
+        //        // ------------------------------
+        //        if (isDirector)
+        //        {
+        //            // ------------------------------
+        //            // Check if edited record already exists
+        //            // ------------------------------
+        //            var edited = db.Question_edited
+        //                           .FirstOrDefault(x => x.question_id == question.id);
 
 
+        //            // ➕ INSERT new record (first time edit)
+        //            var newEdited = new Question_edited
+        //            {
+        //                question_id = question.id,
+        //                text = question.text,
+        //                image = question.image,
+        //                difficulty_level = question.difficulty_level,
+        //                clo_id = question.clo_id,
+        //                marks = question.marks,
+        //                paper_id = question.paper_id,
+        //                isextra = question.isextra,
+        //                editor_id = question.editor_id
+        //            };
+
+        //            db.Question_edited.Add(newEdited);
 
 
+        //            // ✅ Only allow text update in main question
+        //            question.text = request.text;
+        //        }
+        //        else
+        //        {
+        //            // Normal update
+        //            question.text = request.text;
+        //            question.marks = request.marks;
+        //            question.difficulty_level = request.difficulty_level;
+        //            question.clo_id = request.clo_id;
+        //        }
 
+        //        // ------------------------------
+        //        // Handle image (ONLY once, no duplicate)
+        //        // ------------------------------
+        //        string removeImageFlag = httpRequest.Form["removeImage"];
 
+        //        if (httpRequest.Files.Count > 0)
+        //        {
+        //            // Delete old image
+        //            if (!string.IsNullOrEmpty(question.image))
+        //            {
+        //                string oldImagePath = HttpContext.Current.Server.MapPath("~" + question.image.TrimStart('/'));
+        //                if (File.Exists(oldImagePath)) File.Delete(oldImagePath);
+        //            }
 
+        //            // Save new image
+        //            var file = httpRequest.Files[0];
+        //            string ext = Path.GetExtension(file.FileName).ToLower();
+        //            string fileName = $"question_{Guid.NewGuid()}{ext}";
+        //            string path = HttpContext.Current.Server.MapPath("~/Uploads/Questions/");
+        //            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
+        //            file.SaveAs(Path.Combine(path, fileName));
+        //            question.image = "/Uploads/Questions/" + fileName;
+        //        }
+        //        else if (!string.IsNullOrEmpty(removeImageFlag) && removeImageFlag.ToLower() == "true")
+        //        {
+        //            if (!string.IsNullOrEmpty(question.image))
+        //            {
+        //                string oldImagePath = HttpContext.Current.Server.MapPath("~" + question.image.TrimStart('/'));
+        //                if (File.Exists(oldImagePath)) File.Delete(oldImagePath);
+        //            }
 
+        //            question.image = null;
+        //        }
 
+        //        // ------------------------------
+        //        // Version update (safe add)
+        //        // ------------------------------
+        //        question.version = (question.version ?? 0) + 1;
 
+        //        // ------------------------------
+        //        // Save changes
+        //        // ------------------------------
+        //        db.SaveChanges();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        //        return Request.CreateResponse(HttpStatusCode.OK, new
+        //        {
+        //            message = "Question updated successfully",
+        //            QuestionId = question.id
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+        //}
         [HttpPost]
         [Route("api/question/Edit/{id}")]
         public HttpResponseMessage Edit(int id)
@@ -510,7 +870,7 @@ namespace fypProject.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid JSON");
 
                 // ------------------------------
-                // Validate paper, marks, difficulty, CLO
+                // Paper validation
                 // ------------------------------
                 var paper = db.papers.FirstOrDefault(p => p.id == question.paper_id);
                 if (paper == null)
@@ -527,83 +887,198 @@ namespace fypProject.Controllers
                 if (!validLevels.Contains(request.difficulty_level))
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid difficulty level");
 
-                if (request.clo_id != null)
+                // =====================================================
+                // ✅ FIXED CLO HANDLING (MULTIPLE CLO SAFE)
+                // =====================================================
+                List<int> cloIds = new List<int>();
+
+                try
                 {
-                    bool cloExists = db.cloes.Any(c => c.id == request.clo_id && c.course_id == paper.course_id);
-                    if (!cloExists)
-                        return Request.CreateResponse(HttpStatusCode.BadRequest,
-                            "Invalid CLO ID or CLO does not belong to the same course as the paper");
+                    var jsonObj = JsonConvert.DeserializeObject<dynamic>(jsonData);
+
+                    if (jsonObj.clo_ids != null)
+                    {
+                        cloIds = ((IEnumerable<object>)jsonObj.clo_ids)
+                            .Select(x =>
+                            {
+                                int val;
+                                return int.TryParse(x?.ToString(), out val) ? val : -1;
+                            })
+                            .Where(x => x > 0) // remove 0/null/invalid
+                            .Distinct()
+                            .ToList();
+                    }
+                }
+                catch
+                {
+                    cloIds = new List<int>();
                 }
 
                 // ------------------------------
-                // Handle image
+                // CLO VALIDATION
+                // ------------------------------
+                if (cloIds.Any())
+                {
+                    var validCloIds = db.cloes
+                        .Where(c => cloIds.Contains(c.id) && c.course_id == paper.course_id)
+                        .Select(c => c.id)
+                        .ToList();
+
+                    if (validCloIds.Count != cloIds.Count)
+                        return Request.CreateResponse(HttpStatusCode.BadRequest,
+                            "Invalid CLO IDs or CLOs not in same course");
+                }
+
+                // ------------------------------
+                // Topic validation
+                // ------------------------------
+                if (request.topic_id != null)
+                {
+                    bool topicExists = db.topics.Any(t =>
+                        t.id == request.topic_id &&
+                        t.course_id == paper.course_id);
+
+                    if (!topicExists)
+                        return Request.CreateResponse(HttpStatusCode.BadRequest,
+                            "Invalid Topic ID");
+                }
+
+                // ------------------------------
+                // Director flag
+                // ------------------------------
+                var isDirectorFlag = httpRequest.Form["isDirector"];
+                bool isDirector = !string.IsNullOrEmpty(isDirectorFlag) &&
+                                  isDirectorFlag.ToLower() == "true";
+
+                // ------------------------------
+                // MAIN UPDATE LOGIC
+                // ------------------------------
+                if (isDirector)
+                {
+                    var edited = db.Question_edited
+                        .FirstOrDefault(x => x.question_id == question.id);
+
+                    if (edited == null)
+                    {
+                        db.Question_edited.Add(new Question_edited
+                        {
+                            question_id = question.id,
+                            text = question.text,
+                            image = question.image,
+                            difficulty_level = question.difficulty_level,
+                            clo_id = question.clo_id,
+                            topic_id = question.topic_id,
+                            marks = question.marks,
+                            paper_id = question.paper_id,
+                            isextra = question.isextra,
+                            editor_id = question.editor_id
+                        });
+                    }
+
+                    question.text = request.text;
+                }
+                else
+                {
+                    question.text = request.text;
+                    question.marks = request.marks;
+                    question.difficulty_level = request.difficulty_level;
+                    question.topic_id = request.topic_id;
+                }
+
+                // =====================================================
+                // ✅ CLO MAPPING FIX (THIS FIXES YOUR ERROR)
+                // =====================================================
+
+                var existingClo = db.question_clo
+                    .Where(x => x.question_id == question.id)
+                    .ToList();
+
+                if (existingClo.Any())
+                {
+                    db.question_clo.RemoveRange(existingClo);
+                }
+
+                if (cloIds.Any())
+                {
+                    db.question_clo.AddRange(
+                        cloIds.Select(cloId => new question_clo
+                        {
+                            question_id = question.id,
+                            clo_id = cloId
+                        })
+                    );
+                }
+
+                // ------------------------------
+                // IMAGE HANDLING (UNCHANGED)
                 // ------------------------------
                 string removeImageFlag = httpRequest.Form["removeImage"];
 
                 if (httpRequest.Files.Count > 0)
                 {
-                    // New file uploaded → delete old file if exists
                     if (!string.IsNullOrEmpty(question.image))
                     {
                         string oldImagePath = HttpContext.Current.Server.MapPath("~" + question.image.TrimStart('/'));
                         if (File.Exists(oldImagePath)) File.Delete(oldImagePath);
                     }
 
-                    // Save new image
                     var file = httpRequest.Files[0];
                     string ext = Path.GetExtension(file.FileName).ToLower();
                     string fileName = $"question_{Guid.NewGuid()}{ext}";
                     string path = HttpContext.Current.Server.MapPath("~/Uploads/Questions/");
                     if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
                     file.SaveAs(Path.Combine(path, fileName));
                     question.image = "/Uploads/Questions/" + fileName;
                 }
                 else if (!string.IsNullOrEmpty(removeImageFlag) && removeImageFlag.ToLower() == "true")
                 {
-                    // Delete existing image
                     if (!string.IsNullOrEmpty(question.image))
                     {
                         string oldImagePath = HttpContext.Current.Server.MapPath("~" + question.image.TrimStart('/'));
                         if (File.Exists(oldImagePath)) File.Delete(oldImagePath);
                     }
 
-                    question.image = null; // Set DB column to null
-                }
-                // Case 2: Remove existing image
-                else if (!string.IsNullOrEmpty(removeImageFlag) && removeImageFlag.ToLower() == "true")
-                {
-                    if (!string.IsNullOrEmpty(question.image))
-                    {
-                        string oldImagePath = HttpContext.Current.Server.MapPath("~" + question.image.TrimStart('/'));
-                        if (File.Exists(oldImagePath))
-                            File.Delete(oldImagePath);
-                    }
-                    question.image = null; // Set DB column to null
+                    question.image = null;
                 }
 
                 // ------------------------------
-                // Update other fields
+                // Version update
                 // ------------------------------
-                question.text = request.text;
-                question.marks = request.marks;
-                question.difficulty_level = request.difficulty_level;
-                question.clo_id = request.clo_id;
 
-
-
+                // ------------------------------
+                // SAVE
+                // ------------------------------
                 db.SaveChanges();
 
                 return Request.CreateResponse(HttpStatusCode.OK, new
                 {
                     message = "Question updated successfully",
-                    QuestionId = question.id
+                    QuestionId = question.id,
+                    clo_ids = cloIds
                 });
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message
+                });
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
         [HttpPost]
         [Route("api/question/assign_editor")]
@@ -666,45 +1141,144 @@ namespace fypProject.Controllers
         {
             try
             {
-                // Get paper
+                // ------------------------------
+                // 1️⃣ Get Paper
+                // ------------------------------
                 var paper = db.papers.FirstOrDefault(p => p.id == paperId);
                 if (paper == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "Paper not found");
 
-                // Get course details
+                int courseId = paper.course_id;
+                int sessionId = paper.session_id;
+
+                // ------------------------------
+                // 2️⃣ Get Teachers
+                // ------------------------------
+                var teachers = db.Course_Assignment
+                    .Where(ca => ca.course_id == courseId && ca.session_id == sessionId)
+                    .Join(db.Users,
+                          ca => ca.user_id,
+                          u => u.id,
+                          (ca, u) => new
+                          {
+                              TeacherId = u.id,
+                              TeacherName = u.name
+                          })
+                    .Distinct()
+                    .ToList();
+
+                // ------------------------------
+                // 3️⃣ Course & Session
+                // ------------------------------
                 var course = db.courses.FirstOrDefault(c => c.id == paper.course_id);
                 if (course == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, "Course not found");
 
-                // Get session details
                 var session = db.sessions.FirstOrDefault(s => s.id == paper.session_id);
                 string sessionName = session != null ? session.name : "Unknown";
 
-                // Get questions of this paper and parse numeric fields
+                // ------------------------------
+                // 4️⃣ Question IDs
+                // ------------------------------
+                var questionIds = db.Questions
+                    .Where(q => q.paper_id == paperId)
+                    .Select(q => q.id)
+                    .ToList();
+
+                // ------------------------------
+                // 5️⃣ Approvals
+                // ------------------------------
+                var approvals = db.Question_Accept_Reject
+                    .Where(ar => questionIds.Contains(ar.question_id))
+                    .ToList();
+
+                var approvalLookup = approvals
+                    .GroupBy(a => a.question_id)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // ------------------------------
+                // 6️⃣ EDITED QUESTIONS (ALL RECORDS PER QUESTION)
+                // ------------------------------
+                var editedDict = db.Question_edited
+                 .Where(e => e.question_id.HasValue && questionIds.Contains(e.question_id.Value))
+                    .GroupBy(e => e.question_id)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderBy(x => x.id).ToList() // ALL VERSIONS
+                    );
+
+                // ------------------------------question
+                // 7️⃣ QUESTIONS MAPPING
+                // ------------------------------
                 var questions = db.Questions
-                                  .Where(q => q.paper_id == paperId)
-                                  .Select(q => new
-                                  {
-                                      Id = q.id,
-                                      Text = q.text,
+                        .Where(q => q.paper_id == paperId)
+                        .ToList()
+                        .Select(q =>
+                        {
+                            editedDict.TryGetValue(q.id, out var edits);
+                            approvalLookup.TryGetValue(q.id, out var questionApprovals);
 
-                                      Image = q.image,
-                                      DifficultyLevel = q.difficulty_level,
-                                      CloId = q.clo_id.HasValue ? q.clo_id.Value : 0,
-                                      Marks = q.marks.HasValue ? q.marks.Value : 0,
-                                      IsExtra = q.isextra.HasValue ? q.isextra.Value : false,
-                                      EditorId = q.editor_id.HasValue ? q.editor_id.Value : 0
-                                  }).ToList();
+                            return new
+                            {
+                                Id = q.id,
 
+                                // 🔹 ORIGINAL
+                                Text = q.text,
+                                Image = q.image,
+
+                                // 🔥 ALL EDITED VERSIONS (FIXED)
+                                EditedVersions = edits?.Select(e => new
+                                {
+                                    e.id,
+                                    e.question_id,
+                                    e.text,
+                                    e.image,
+                                    e.editor_id,
+
+                                }).ToList(),
+
+                                // 🔹 LATEST EDIT (optional UI convenience)
+                                EditedText = edits?.FirstOrDefault()?.text,
+
+                                // 🔹 FLAG
+                                IsEdited = edits != null && edits.Any(),
+
+                                DifficultyLevel = q.difficulty_level,
+                                CloId = q.clo_id ?? 0,
+                                Marks = q.marks ?? 0,
+                                IsExtra = q.isextra ?? false,
+                                EditorId = q.editor_id ?? 0,
+
+                                // 🔹 TEACHER STATUSES
+                                TeacherStatuses = teachers.Select(t =>
+                                {
+                                    var status = questionApprovals?
+                                        .FirstOrDefault(a => a.user_id == t.TeacherId);
+
+                                    return new
+                                    {
+                                        TeacherId = t.TeacherId,
+                                        TeacherName = t.TeacherName,
+                                        Status = status != null ? status.status : "pending"
+                                    };
+                                }).ToList()
+                            };
+                        })
+                        .ToList();
+
+                // ------------------------------
+                // 8️⃣ FINAL RESPONSE
+                // ------------------------------
                 var response = new PaperQuestionsResponse
                 {
                     PaperId = paper.id,
                     Term = paper.term,
                     TeacherName = paper.teacher_name,
                     PaperStatus = paper.status,
-                    TotalMarks = paper.total_marks.HasValue ? paper.total_marks.Value : 0,
-                    NoOfQuestions = paper.no_of_questions.HasValue ? paper.no_of_questions.Value : 0,
+                    TotalMarks = paper.total_marks ?? 0,
+                    NoOfQuestions = paper.no_of_questions ?? 0,
                     DegreePrograms = paper.degree_programs,
+                    PaperSolution = paper.paper_solution,
                     CourseCode = course.course_code,
                     CourseTitle = course.title,
                     CourseCreditHours = course.credit_hours,
@@ -721,13 +1295,6 @@ namespace fypProject.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
-
-
-
-
-
-
-
 
 
         [HttpPost]
@@ -826,7 +1393,8 @@ namespace fypProject.Controllers
                     PaperId = request.PaperId,
                     QuestionId = request.QuestionId,
                     UserId = request.UserId,
-                    paperStatus = paper.status // ✅ send updated paper status
+                    paperStatus = paper.status, // ✅ send updated paper status
+                    allApproved
                 });
             }
             catch (Exception ex)
@@ -892,18 +1460,27 @@ namespace fypProject.Controllers
 
         [HttpGet]
         [Route("api/paper/get_PaperInFo_details/{courseId}")]
-        public HttpResponseMessage GetPaperInfoDetails(int courseId, string term = "mid")
+        public HttpResponseMessage GetPaperInfoDetails(int courseId, string term = "mid", string type = "theory")
         {
             try
             {
-                // 1️⃣ Get the course
+                // 1️⃣ Active session
+                var activeSession = db.sessions.FirstOrDefault(s => s.Active);
+                int? activeSessionId = activeSession?.id;
+
+                // 2️⃣ Get course
                 var course = db.courses.FirstOrDefault(c => c.id == courseId);
                 if (course == null)
                     return Request.CreateResponse(HttpStatusCode.NotFound, new { message = "Course not found" });
 
-                // 2️⃣ Get the paper for this course and term
+                // 3️⃣ Get paper (SAFE + NULL PROTECTED)
                 var paper = db.papers
-                    .Where(p => p.course_id == courseId && p.term.ToLower() == term.ToLower())
+                    .Where(p =>
+                        p.course_id == courseId &&
+                        (p.term ?? "").ToLower() == term.ToLower() &&
+                        (p.type ?? "theory").ToLower() == type.ToLower() &&
+                        (!activeSessionId.HasValue || p.session_id == activeSessionId)
+                    )
                     .Select(p => new
                     {
                         paperId = p.id,
@@ -920,33 +1497,38 @@ namespace fypProject.Controllers
                         totalMarks = p.total_marks,
                         teachersName = p.teacher_name,
                         term = p.term,
+                        type = p.type,
                         noOfQuestions = p.no_of_questions,
                         paperExists = true
                     })
                     .FirstOrDefault();
 
-                // 3️⃣ Check if paper exists AND has meaningful data
-                if (paper != null && !string.IsNullOrEmpty(paper.teachersName) && (paper.noOfQuestions ?? 0) > 0)
+                // 4️⃣ If paper exists and valid → return it
+                if (paper != null &&
+                    !string.IsNullOrEmpty(paper.teachersName) &&
+                    (paper.noOfQuestions ?? 0) > 0)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, paper);
                 }
 
-                // 4️⃣ Fallback → fetch teachers from Course_Assignment for active session
-                var activeSession = db.sessions.FirstOrDefault(s => s.Active);
-                int? activeSessionId = activeSession?.id;
-
+                // 5️⃣ Fallback teachers
                 var teacherNames = db.Course_Assignment
-                    .Where(ca => ca.course_id == courseId && (activeSessionId == null || ca.session_id == activeSessionId))
+                    .Where(ca =>
+                        ca.course_id == courseId &&
+                        (!activeSessionId.HasValue || ca.session_id == activeSessionId)
+                    )
                     .Join(db.Users,
-                          ca => ca.user_id,
-                          u => u.id,
-                          (ca, u) => u.name)
+                        ca => ca.user_id,
+                        u => u.id,
+                        (ca, u) => u.name)
                     .Distinct()
                     .ToList();
 
-                string teachersString = teacherNames.Any() ? string.Join(", ", teacherNames) : "";
+                string teachersString = teacherNames.Any()
+                    ? string.Join(", ", teacherNames)
+                    : "";
 
-                // 5️⃣ Return default paper info with teacher names
+                // 6️⃣ Default response (SAFE)
                 return Request.CreateResponse(HttpStatusCode.OK, new
                 {
                     paperId = paper?.paperId ?? 0,
@@ -962,6 +1544,10 @@ namespace fypProject.Controllers
                     totalMarks = "",
                     teachersName = teachersString,
                     term = term.ToLower(),
+
+                    // 🔥 IMPORTANT FIX (NO NULL CRASH)
+                    type = paper?.type ?? type,
+
                     noOfQuestions = 0,
                     paperExists = false
                 });
@@ -971,6 +1557,9 @@ namespace fypProject.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, new { message = ex.Message });
             }
         }
+
+
+
         [HttpPost]
         [Route("api/paper/ReorderQuestionsNoOrder/{paperId}")]
         public IHttpActionResult ReorderQuestionsNoOrder(int paperId, [FromBody] List<int> newOrderIds)
@@ -1261,38 +1850,99 @@ namespace fypProject.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
         [HttpPost]
-        [Route("api/paper/directorApprove/{paperId}")]
-        public IHttpActionResult DirectorApprove(int paperId)
+        [Route("api/question/director_approve_reject")]
+        public HttpResponseMessage DirectorApproveRejectQuestion([FromBody] Director_Question_Accept_RejectDTO request)
         {
-            var paper = db.papers.Find(paperId);
-
-            if (paper == null)
-                return NotFound();
-
-            // ✅ Only allow change from Submitted
-            if (paper.status != "Submitted")
-                return BadRequest("Paper is not in Submitted state.");
-
-            // ✅ Change status
-            paper.status = "Approved";
-
-            db.SaveChanges();
-
-            return Ok(new
+            try
             {
-                message = "Paper approved successfully by Director.",
-                PaperStatus = paper.status
-            });
+                if (request == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid request data");
+
+                // Validate status
+                string statusLower = request.Status?.ToLower();
+                if (statusLower != "approved" && statusLower != "reject")
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Status must be 'approved' or 'reject'");
+
+                // Get user
+                var user = db.Users.FirstOrDefault(u => u.id == request.UserId);
+                if (user == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "User not found");
+
+                // ✅ Check Director role using Role_Assignment table (your pattern)
+                bool isDirector = db.Role_Assignment
+                    .Where(ra => ra.user_id == request.UserId)
+                    .Join(db.Roles, ra => ra.role_id, r => r.id, (ra, r) => r.name)
+                    .Any(role => role == "Director");
+
+                if (!isDirector)
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, "Only Director can perform this action");
+
+                // Get paper details
+                var paper = db.papers.FirstOrDefault(p => p.id == request.PaperId);
+                if (paper == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Paper not found");
+
+                // Get question details
+                var question = db.Questions.FirstOrDefault(q => q.id == request.QuestionId);
+                if (question == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Question not found");
+
+                // Verify question belongs to paper
+                if (question.paper_id != request.PaperId)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Question does not belong to this paper");
+
+
+                // Save Director's approval/rejection
+                var existing = db.Question_Accept_Reject
+                                 .FirstOrDefault(q => q.question_id == request.QuestionId && q.user_id == request.UserId);
+
+                if (existing != null)
+                {
+                    existing.status = statusLower;
+
+                }
+                else
+                {
+                    var newEntry = new Question_Accept_Reject
+                    {
+                        question_id = request.QuestionId,
+                        user_id = request.UserId,
+                        status = statusLower,
+
+                    };
+                    db.Question_Accept_Reject.Add(newEntry);
+                }
+
+                db.SaveChanges();
+
+
+
+                return Request.CreateResponse(HttpStatusCode.OK, new
+                {
+                    success = true,
+                    message = $"Question {statusLower} by Director successfully",
+                    data = new
+                    {
+                        PaperId = request.PaperId,
+                        QuestionId = request.QuestionId,
+                        UserId = request.UserId,
+                        Status = statusLower,
+
+                        paperStatus = paper.status,
+
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, new
+                {
+                    success = false,
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
         }
 
 
@@ -1305,21 +1955,269 @@ namespace fypProject.Controllers
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public class DirectorApproveRequestDto
+        {
+            public int UserId { get; set; }
+        }
+
+
+
+        [HttpPost]
+        [Route("api/paper/directorApprove/{paperId}")]
+        public IHttpActionResult DirectorApprove(int paperId, [FromBody] DirectorApproveRequestDto request)
+        {
+            if (request == null)
+                return BadRequest("Invalid request data");
+
+            try
+            {
+                var paper = db.papers.Find(paperId);
+                if (paper == null)
+                    return NotFound();
+
+                // Validate director
+                var director = db.Users.FirstOrDefault(u => u.id == request.UserId);
+                if (director == null)
+                    return BadRequest("User not found");
+
+                // Check Director role
+                bool isDirector = db.Role_Assignment
+                    .Where(ra => ra.user_id == request.UserId)
+                    .Join(db.Roles, ra => ra.role_id, r => r.id, (ra, r) => r.name)
+                    .Any(role => role == "Director");
+
+                if (!isDirector)
+                    return Unauthorized();
+
+                // Check paper status
+                if (paper.status != "Submitted")
+                    return BadRequest($"Paper is not in Submitted state. Current state: {paper.status}");
+
+                // Get questions
+                var questions = db.Questions.Where(q => q.paper_id == paperId).ToList();
+                if (!questions.Any())
+                    return BadRequest("No questions found for this paper.");
+
+
+                var questionIds = db.Questions
+    .Where(q => q.paper_id == paperId)
+    .Select(q => q.id)
+    .ToList();
+                // ✅ Check if Director has rejected any question
+                bool hasRejection = db.Question_Accept_Reject
+         .Any(qar => questionIds.Contains(qar.question_id)
+                  && qar.user_id == request.UserId
+                  && qar.status == "reject");
+
+                if (hasRejection)
+                {
+                    paper.status = "Rejected";
+                    db.SaveChanges();
+
+                    return Ok(new
+                    {
+                        message = "Paper rejected because Director rejected one or more questions.",
+                        PaperStatus = paper.status,
+                        RejectedBy = director.name,
+                        RejectedDate = DateTime.Now
+                    });
+                }
+
+                // ✅ Check if Director has approved ALL questions
+                var directorApprovals = db.Question_Accept_Reject
+                    .Where(qar => qar.user_id == request.UserId)
+                    .ToList();
+
+                var allQuestionsApprovedByDirector = questions.All(q =>
+                    directorApprovals.Any(da => da.question_id == q.id && da.status == "approved")
+                );
+
+                if (!allQuestionsApprovedByDirector)
+                {
+                    // Find which questions are not approved by Director
+                    var unapprovedQuestions = questions
+                        .Where(q => !directorApprovals.Any(da => da.question_id == q.id && da.status == "approved"))
+                        .Select(q => new { q.id, q.text })
+                        .ToList();
+
+                    return BadRequest(
+                    "Cannot approve paper. Director has not approved all questions."
+                     );
+                }
+
+                // ✅ Director has approved ALL questions - Approve the paper
+                paper.status = "Approved";
+                db.SaveChanges();
+
+                return Ok(new
+                {
+                    message = "Paper approved successfully by Director. All questions have been approved.",
+                    PaperStatus = paper.status,
+                    ApprovedBy = director.name,
+                    ApprovedDate = DateTime.Now,
+                    TotalQuestions = questions.Count,
+                    TotalDirectorApprovals = directorApprovals.Count(a => a.status == "approved")
+                });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("api/paper/upload_solution")]
+        public HttpResponseMessage UploadSolution()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+
+                // 🔹 Get paper_id from FormData
+                var paperIdStr = httpRequest.Form["paper_id"];
+
+                if (string.IsNullOrEmpty(paperIdStr))
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Paper ID is required");
+
+                int paperId = Convert.ToInt32(paperIdStr);
+
+                var paper = db.papers.FirstOrDefault(p => p.id == paperId);
+
+                if (paper == null)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Paper not found");
+
+                // 🔹 Check file exists
+                if (httpRequest.Files.Count == 0)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "No file uploaded");
+
+                var file = httpRequest.Files[0];
+
+                // 🔹 Validate extension
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                var allowed = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
+
+                if (!allowed.Contains(ext))
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Invalid file type");
+
+                // 🔥 DELETE OLD FILE (optional but recommended)
+                if (!string.IsNullOrEmpty(paper.paper_solution))
+                {
+                    string oldPath = HttpContext.Current.Server.MapPath("~" + paper.paper_solution);
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
+                }
+
+                // 🔹 Create folder
+                string folderPath = HttpContext.Current.Server.MapPath("~/Uploads/PaperSolutions/");
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                // 🔹 Unique file name
+                string fileName = $"solution_{Guid.NewGuid()}{ext}";
+
+                // 🔹 Full path
+                string fullPath = Path.Combine(folderPath, fileName);
+
+                // 🔹 Save file
+                file.SaveAs(fullPath);
+
+                // 🔹 Save path in DB
+                paper.paper_solution = "/Uploads/PaperSolutions/" + fileName;
+
+                db.SaveChanges();
+
+                return Request.CreateResponse(HttpStatusCode.OK, new
+                {
+                    message = "File uploaded successfully",
+                    path = paper.paper_solution
+                });
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

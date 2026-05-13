@@ -19,6 +19,8 @@ namespace fypProject.Models
         {
             this.Clo_Weightage = new HashSet<Clo_Weightage>();
             this.Questions = new HashSet<Question>();
+            this.Question_edited = new HashSet<Question_edited>();
+            this.question_clo = new HashSet<question_clo>();
         }
     
         public int id { get; set; }
@@ -32,5 +34,9 @@ namespace fypProject.Models
         public virtual session session { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Question> Questions { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Question_edited> Question_edited { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<question_clo> question_clo { get; set; }
     }
 }

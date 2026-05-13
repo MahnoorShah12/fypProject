@@ -9,14 +9,13 @@ using System;
 
 namespace fypProject.Controllers
 {
+   
     public class AllPapersController : ApiController
     {
 
 
 
         private DirectorDashboardEntities db = new DirectorDashboardEntities();
-
-
 
 
 
@@ -76,13 +75,21 @@ namespace fypProject.Controllers
                     Uploaded = mappedPapers.Count(x => x.Status == "Uploaded"),
                     Pending = mappedPapers.Count(x => x.Status == "Pending"),
                     Approved = mappedPapers.Count(x => x.Status == "Approved"),
-                    Printed = mappedPapers.Count(x => x.Status == "Printed")
+                    Verified = mappedPapers.Count(x => x.Status == "Verified")
                 };
 
                 return Request.CreateResponse(HttpStatusCode.OK, new
                 {
                     Papers = mappedPapers,
-                    Counts = counts
+                    Counts = counts,
+                    ActiveSession = new
+                    {
+                        activeSession.id,
+                        activeSession.name,
+                        activeSession.start_date,
+                        activeSession.end_date,
+                        activeSession.Active
+                    }
                 });
             }
             catch (Exception ex)
@@ -90,6 +97,7 @@ namespace fypProject.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
 
         // 🔥 Status Mapping Function
         private string MapStatus(string dbStatus)
@@ -100,8 +108,8 @@ namespace fypProject.Controllers
             if (dbStatus == "Approved")
                 return "Approved";
 
-            if (dbStatus == "Printed")
-                return "Printed";
+            if (dbStatus == "Verified")
+                return "Verified";
 
             if (dbStatus == "Creation" ||
                 dbStatus == "ReadyForFacultyApprover" ||
@@ -141,7 +149,7 @@ namespace fypProject.Controllers
             try
             {
 
-                var query = db.papers.Where(p => p.status == "printed");
+                var query = db.papers.Where(p => p.status == "Verified");
 
                 if (sessionId.HasValue)
                 {

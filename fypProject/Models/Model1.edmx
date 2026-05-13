@@ -110,6 +110,8 @@
           <Property Name="term" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="no_of_questions" Type="int" />
           <Property Name="status" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="paper_solution" Type="varchar(max)" />
+          <Property Name="type" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="paper_Assignment">
           <Key>
@@ -135,6 +137,7 @@
           <Property Name="isextra" Type="bit" />
           <Property Name="editor_id" Type="int" />
           <Property Name="version" Type="int" />
+          <Property Name="topic_id" Type="int" />
         </EntityType>
         <EntityType Name="Question_Accept_Reject">
           <Key>
@@ -145,20 +148,29 @@
           <Property Name="user_id" Type="int" Nullable="false" />
           <Property Name="status" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
+        <EntityType Name="question_clo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="question_id" Type="int" Nullable="false" />
+          <Property Name="clo_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Question_edited">
           <Key>
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="text" Type="varchar" MaxLength="225" />
-          <Property Name="description" Type="varchar" MaxLength="225" />
-          <Property Name="image" Type="varchar" MaxLength="225" />
+          <Property Name="text" Type="varchar" MaxLength="255" />
+          <Property Name="image" Type="varchar" MaxLength="255" />
           <Property Name="difficulty_level" Type="varchar" MaxLength="50" />
           <Property Name="clo_id" Type="int" />
           <Property Name="marks" Type="int" />
-          <Property Name="paper_id" Type="int" Nullable="false" />
+          <Property Name="paper_id" Type="int" />
           <Property Name="isextra" Type="bit" />
           <Property Name="editor_id" Type="int" />
+          <Property Name="question_id" Type="int" />
+          <Property Name="topic_id" Type="int" />
         </EntityType>
         <EntityType Name="Role_Assignment">
           <Key>
@@ -255,6 +267,42 @@
           <Property Name="Vetting_Time" Type="time" Precision="7" />
           <Property Name="session_id" Type="int" />
         </EntityType>
+        <Association Name="FK__Question___clo_i__214BF109">
+          <End Role="clo" Type="Self.clo" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Question___paper__22401542">
+          <End Role="paper" Type="Self.paper" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Question___quest__2057CCD0">
+          <End Role="Question" Type="Self.Question" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_clo">
           <End Role="clo" Type="Self.clo" Multiplicity="1" />
           <End Role="Clo_Weightage" Type="Self.Clo_Weightage" Multiplicity="*" />
@@ -423,6 +471,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_question_clo_clo">
+          <End Role="clo" Type="Self.clo" Multiplicity="1" />
+          <End Role="question_clo" Type="Self.question_clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="question_clo">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_question_clo_question">
+          <End Role="Question" Type="Self.Question" Multiplicity="1" />
+          <End Role="question_clo" Type="Self.question_clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="question_clo">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_question_clo7">
           <End Role="clo" Type="Self.clo" Multiplicity="0..1" />
           <End Role="Question" Type="Self.Question" Multiplicity="*" />
@@ -471,6 +543,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Question_Topic">
+          <End Role="topic" Type="Self.topic" Multiplicity="0..1" />
+          <End Role="Question" Type="Self.Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="topic_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_question2">
           <End Role="Question" Type="Self.Question" Multiplicity="1" />
           <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
@@ -492,6 +576,18 @@
             </Principal>
             <Dependent Role="Comment_Paper_Question">
               <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_QuestionEdited_Topic">
+          <End Role="topic" Type="Self.topic" Multiplicity="0..1" />
+          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="topic_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -735,18 +831,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_user7">
-          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
-          <End Role="Question_edited" Type="Self.Question_edited" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Question_edited">
-              <PropertyRef Name="editor_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_user8">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Question_Accept_Reject" Type="Self.Question_Accept_Reject" Multiplicity="*" />
@@ -773,6 +857,7 @@
           <EntitySet Name="paper_Assignment" EntityType="Self.paper_Assignment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Question" EntityType="Self.Question" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Question_Accept_Reject" EntityType="Self.Question_Accept_Reject" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="question_clo" EntityType="Self.question_clo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Question_edited" EntityType="Self.Question_edited" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Role_Assignment" EntityType="Self.Role_Assignment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
@@ -784,6 +869,18 @@
           <EntitySet Name="topic_teach" EntityType="Self.topic_teach" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Vetting_Timming_Assignment" EntityType="Self.Vetting_Timming_Assignment" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__Question___clo_i__214BF109" Association="Self.FK__Question___clo_i__214BF109">
+            <End Role="clo" EntitySet="clo" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Question___paper__22401542" Association="Self.FK__Question___paper__22401542">
+            <End Role="paper" EntitySet="paper" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Question___quest__2057CCD0" Association="Self.FK__Question___quest__2057CCD0">
+            <End Role="Question" EntitySet="Question" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
           <AssociationSet Name="fk_clo" Association="Self.fk_clo">
             <End Role="clo" EntitySet="clo" />
             <End Role="Clo_Weightage" EntitySet="Clo_Weightage" />
@@ -840,6 +937,14 @@
             <End Role="paper" EntitySet="paper" />
             <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
           </AssociationSet>
+          <AssociationSet Name="FK_question_clo_clo" Association="Self.FK_question_clo_clo">
+            <End Role="clo" EntitySet="clo" />
+            <End Role="question_clo" EntitySet="question_clo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_question_clo_question" Association="Self.FK_question_clo_question">
+            <End Role="Question" EntitySet="Question" />
+            <End Role="question_clo" EntitySet="question_clo" />
+          </AssociationSet>
           <AssociationSet Name="fk_question_clo7" Association="Self.fk_question_clo7">
             <End Role="clo" EntitySet="clo" />
             <End Role="Question" EntitySet="Question" />
@@ -856,6 +961,10 @@
             <End Role="paper" EntitySet="paper" />
             <End Role="Question" EntitySet="Question" />
           </AssociationSet>
+          <AssociationSet Name="FK_Question_Topic" Association="Self.FK_Question_Topic">
+            <End Role="topic" EntitySet="topic" />
+            <End Role="Question" EntitySet="Question" />
+          </AssociationSet>
           <AssociationSet Name="fk_question2" Association="Self.fk_question2">
             <End Role="Question" EntitySet="Question" />
             <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
@@ -863,6 +972,10 @@
           <AssociationSet Name="fk_question3" Association="Self.fk_question3">
             <End Role="Question" EntitySet="Question" />
             <End Role="Comment_Paper_Question" EntitySet="Comment_Paper_Question" />
+          </AssociationSet>
+          <AssociationSet Name="FK_QuestionEdited_Topic" Association="Self.FK_QuestionEdited_Topic">
+            <End Role="topic" EntitySet="topic" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
           </AssociationSet>
           <AssociationSet Name="fk_receiver" Association="Self.fk_receiver">
             <End Role="Users" EntitySet="Users" />
@@ -944,10 +1057,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Question" EntitySet="Question" />
           </AssociationSet>
-          <AssociationSet Name="fk_user7" Association="Self.fk_user7">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Question_edited" EntitySet="Question_edited" />
-          </AssociationSet>
           <AssociationSet Name="fk_user8" Association="Self.fk_user8">
             <End Role="Users" EntitySet="Users" />
             <End Role="Question_Accept_Reject" EntitySet="Question_Accept_Reject" />
@@ -982,6 +1091,8 @@
           <Property Name="session_id" Type="Int32" />
           <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_clos_session" FromRole="clo" ToRole="session" />
           <NavigationProperty Name="Questions" Relationship="DirectorDashboardModel.fk_question_clo7" FromRole="clo" ToRole="Question" />
+          <NavigationProperty Name="Question_edited" Relationship="DirectorDashboardModel.FK__Question___clo_i__214BF109" FromRole="clo" ToRole="Question_edited" />
+          <NavigationProperty Name="question_clo" Relationship="DirectorDashboardModel.FK_question_clo_clo" FromRole="clo" ToRole="question_clo" />
         </EntityType>
         <EntityType Name="Clo_Weightage">
           <Key>
@@ -1090,6 +1201,9 @@
           <NavigationProperty Name="Questions" Relationship="DirectorDashboardModel.fk_question_paper" FromRole="paper" ToRole="Question" />
           <NavigationProperty Name="Questions1" Relationship="DirectorDashboardModel.fk_question_paper2" FromRole="paper" ToRole="Question" />
           <NavigationProperty Name="Questions2" Relationship="DirectorDashboardModel.fk_question_paper7" FromRole="paper" ToRole="Question" />
+          <Property Name="paper_solution" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Question_edited" Relationship="DirectorDashboardModel.FK__Question___paper__22401542" FromRole="paper" ToRole="Question_edited" />
+          <Property Name="type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="paper_Assignment">
           <Key>
@@ -1125,6 +1239,10 @@
           <NavigationProperty Name="paper" Relationship="DirectorDashboardModel.fk_question_paper" FromRole="Question" ToRole="paper" />
           <NavigationProperty Name="paper1" Relationship="DirectorDashboardModel.fk_question_paper2" FromRole="Question" ToRole="paper" />
           <NavigationProperty Name="paper2" Relationship="DirectorDashboardModel.fk_question_paper7" FromRole="Question" ToRole="paper" />
+          <NavigationProperty Name="Question_edited" Relationship="DirectorDashboardModel.FK_QuestionEdited_Questions" FromRole="Question" ToRole="Question_edited" />
+          <Property Name="topic_id" Type="Int32" />
+          <NavigationProperty Name="topic" Relationship="DirectorDashboardModel.FK_Question_Topic" FromRole="Question" ToRole="topic" />
+          <NavigationProperty Name="question_clo" Relationship="DirectorDashboardModel.FK_question_clo_question" FromRole="Question" ToRole="question_clo" />
         </EntityType>
         <EntityType Name="Question_Accept_Reject">
           <Key>
@@ -1142,16 +1260,21 @@
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="text" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
-          <Property Name="description" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
-          <Property Name="image" Type="String" MaxLength="225" FixedLength="false" Unicode="false" />
+          <Property Name="text" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="difficulty_level" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="clo_id" Type="Int32" />
           <Property Name="marks" Type="Int32" />
-          <Property Name="paper_id" Type="Int32" Nullable="false" />
+          <Property Name="paper_id" Type="Int32" />
           <Property Name="isextra" Type="Boolean" />
           <Property Name="editor_id" Type="Int32" />
           <NavigationProperty Name="User" Relationship="Self.fk_user7" FromRole="Question_edited" ToRole="Users" />
+          <Property Name="question_id" Type="Int32" />
+          <NavigationProperty Name="Question" Relationship="DirectorDashboardModel.FK_QuestionEdited_Questions" FromRole="Question_edited" ToRole="Question" />
+          <NavigationProperty Name="clo" Relationship="DirectorDashboardModel.FK__Question___clo_i__214BF109" FromRole="Question_edited" ToRole="clo" />
+          <NavigationProperty Name="paper" Relationship="DirectorDashboardModel.FK__Question___paper__22401542" FromRole="Question_edited" ToRole="paper" />
+          <Property Name="topic_id" Type="Int32" />
+          <NavigationProperty Name="topic" Relationship="DirectorDashboardModel.FK_QuestionEdited_Topic" FromRole="Question_edited" ToRole="topic" />
         </EntityType>
         <EntityType Name="Role_Assignment">
           <Key>
@@ -1221,6 +1344,8 @@
           <NavigationProperty Name="topic_teach" Relationship="Self.fk_topic1" FromRole="topic" ToRole="topic_teach" />
           <Property Name="session_id" Type="Int32" />
           <NavigationProperty Name="session" Relationship="DirectorDashboardModel.FK_Topic_Session" FromRole="topic" ToRole="session" />
+          <NavigationProperty Name="Questions" Relationship="DirectorDashboardModel.FK_Question_Topic" FromRole="topic" ToRole="Question" />
+          <NavigationProperty Name="Question_edited" Relationship="DirectorDashboardModel.FK_QuestionEdited_Topic" FromRole="topic" ToRole="Question_edited" />
         </EntityType>
         <EntityType Name="topic_teach">
           <Key>
@@ -1833,6 +1958,35 @@
             <End Role="User" EntitySet="Users" />
             <End Role="TeacherFreeSlot" EntitySet="TeacherFreeSlots" />
           </AssociationSet>
+          <AssociationSet Name="FK_QuestionEdited_Questions" Association="DirectorDashboardModel.FK_QuestionEdited_Questions">
+            <End Role="Question" EntitySet="Questions" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Question___clo_i__214BF109" Association="DirectorDashboardModel.FK__Question___clo_i__214BF109">
+            <End Role="clo" EntitySet="cloes" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Question___paper__22401542" Association="DirectorDashboardModel.FK__Question___paper__22401542">
+            <End Role="paper" EntitySet="papers" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Question_Topic" Association="DirectorDashboardModel.FK_Question_Topic">
+            <End Role="topic" EntitySet="topics" />
+            <End Role="Question" EntitySet="Questions" />
+          </AssociationSet>
+          <EntitySet Name="question_clo" EntityType="DirectorDashboardModel.question_clo" />
+          <AssociationSet Name="FK_question_clo_clo" Association="DirectorDashboardModel.FK_question_clo_clo">
+            <End Role="clo" EntitySet="cloes" />
+            <End Role="question_clo" EntitySet="question_clo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_question_clo_question" Association="DirectorDashboardModel.FK_question_clo_question">
+            <End Role="Question" EntitySet="Questions" />
+            <End Role="question_clo" EntitySet="question_clo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_QuestionEdited_Topic" Association="DirectorDashboardModel.FK_QuestionEdited_Topic">
+            <End Role="topic" EntitySet="topics" />
+            <End Role="Question_edited" EntitySet="Question_edited" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_clos_session">
           <End Type="DirectorDashboardModel.session" Role="session" Multiplicity="0..1" />
@@ -1989,6 +2143,100 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_QuestionEdited_Questions">
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question_edited" Role="Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Question___clo_i__214BF109">
+          <End Type="DirectorDashboardModel.clo" Role="clo" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question_edited" Role="Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Question___paper__22401542">
+          <End Type="DirectorDashboardModel.paper" Role="paper" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question_edited" Role="Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="paper">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="paper_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Question_Topic">
+          <End Type="DirectorDashboardModel.topic" Role="topic" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question">
+              <PropertyRef Name="topic_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="question_clo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="question_id" Type="Int32" Nullable="false" />
+          <Property Name="clo_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="clo" Relationship="DirectorDashboardModel.FK_question_clo_clo" FromRole="question_clo" ToRole="clo" />
+          <NavigationProperty Name="Question" Relationship="DirectorDashboardModel.FK_question_clo_question" FromRole="question_clo" ToRole="Question" />
+        </EntityType>
+        <Association Name="FK_question_clo_clo">
+          <End Type="DirectorDashboardModel.clo" Role="clo" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.question_clo" Role="question_clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="clo">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="question_clo">
+              <PropertyRef Name="clo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_question_clo_question">
+          <End Type="DirectorDashboardModel.Question" Role="Question" Multiplicity="1" />
+          <End Type="DirectorDashboardModel.question_clo" Role="question_clo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Question">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="question_clo">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_QuestionEdited_Topic">
+          <End Type="DirectorDashboardModel.topic" Role="topic" Multiplicity="0..1" />
+          <End Type="DirectorDashboardModel.Question_edited" Role="Question_edited" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topic">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Question_edited">
+              <PropertyRef Name="topic_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2087,6 +2335,8 @@
           <EntitySetMapping Name="papers">
             <EntityTypeMapping TypeName="DirectorDashboardModel.paper">
               <MappingFragment StoreEntitySet="paper">
+                <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="paper_solution" ColumnName="paper_solution" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="session_id" ColumnName="session_id" />
                 <ScalarProperty Name="course_id" ColumnName="course_id" />
@@ -2116,6 +2366,7 @@
           <EntitySetMapping Name="Questions">
             <EntityTypeMapping TypeName="DirectorDashboardModel.Question">
               <MappingFragment StoreEntitySet="Question">
+                <ScalarProperty Name="topic_id" ColumnName="topic_id" />
                 <ScalarProperty Name="version" ColumnName="version" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="text" ColumnName="text" />
@@ -2143,9 +2394,10 @@
           <EntitySetMapping Name="Question_edited">
             <EntityTypeMapping TypeName="DirectorDashboardModel.Question_edited">
               <MappingFragment StoreEntitySet="Question_edited">
+                <ScalarProperty Name="topic_id" ColumnName="topic_id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="text" ColumnName="text" />
-                <ScalarProperty Name="description" ColumnName="description" />
                 <ScalarProperty Name="image" ColumnName="image" />
                 <ScalarProperty Name="difficulty_level" ColumnName="difficulty_level" />
                 <ScalarProperty Name="clo_id" ColumnName="clo_id" />
@@ -2266,6 +2518,15 @@
                 <ScalarProperty Name="SessionId" ColumnName="SessionId" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="question_clo">
+            <EntityTypeMapping TypeName="DirectorDashboardModel.question_clo">
+              <MappingFragment StoreEntitySet="question_clo">
+                <ScalarProperty Name="clo_id" ColumnName="clo_id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
